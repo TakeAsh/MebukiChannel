@@ -7,7 +7,7 @@
       'https://www.takeash.net/js/modules/AutoSaveConfig.js',
     ],
     [
-      'https://www.takeash.net/GetMeta/userscript/MebukiPlus.user.js',
+      'https://www.takeash.net/MebukiChannel/MebukiPlus/MebukiPlus.user.js',
     ],
   ];
   const loadScript = (src) => new Promise((resolve, reject) => {
