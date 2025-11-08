@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-08_19:50
+// @version      2025-11-08_23:30
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -16,7 +16,11 @@
 
 (async (w, d) => {
   'use strict';
-  const urlSprites = 'https://www.takeash.net/MebukiChannel/Mebukichi/img/Mebukichi1.png';
+  const urlSpritesBase = 'https://www.takeash.net/MebukiChannel/Mebukichi/img';
+  const Sprites = new CyclicEnum('Mebukichi1', 'Mebukichi0');
+  const settings = new AutoSaveConfig({
+    Sprite: Sprites.Mebukichi1,
+  }, 'MebukichiSettings');
   class Mebukichi {
     static #directions = new CyclicEnum(
       'Front', 'Back', 'UpLeft', 'Up', 'UpRight',
@@ -26,7 +30,7 @@
     static #sprites = {};
     static #cycleMax = 4;
     static #stride = 16;
-    #elm = prepareElement({
+    #elmMebukichi = prepareElement({
       tag: 'div',
       id: 'Mebukichi',
       children: [
@@ -44,6 +48,9 @@
     #cycle = 0;
 
     static {
+      Mebukichi.setSprite(settings.Sprite);
+    }
+    static setSprite(name) {
       const cvsSrc = d.createElement('canvas');
       const ctxSrc = cvsSrc.getContext('2d', { willReadFrequently: true, });
       const cvsDst = d.createElement('canvas');
@@ -64,8 +71,8 @@
           }
         });
       });
-      img.src = urlSprites;
-    };
+      img.src = `${urlSpritesBase}/${name}.png`;
+    }
     static #getDirection = (dx, dy) => {
       return dy < 0 && dx < 0 ? this.#directions.UpLeft :
         dy < 0 && dx > 0 ? this.#directions.UpRight :
@@ -87,7 +94,7 @@
       const dy = Math.sign(Math.floor((this.#targetY - this.#mebY) / 16));
       this.#mebX += dx * Mebukichi.#stride;
       this.#mebY += dy * Mebukichi.#stride;
-      this.#elm.animate(
+      this.#elmMebukichi.animate(
         { left: `${this.#mebX}px`, top: `${this.#mebY}px`, },
         { duration: 1000, fill: 'forwards' }
       );
@@ -110,12 +117,105 @@
           width: '100%', height: '100%',
         },
       });
-      this.#img = this.#elm.querySelector('#MebukichiImg');
-      d.body.appendChild(this.#elm);
+      this.#img = this.#elmMebukichi.querySelector('#MebukichiImg');
+      d.body.appendChild(this.#elmMebukichi);
       d.body.addEventListener('pointermove', this.#getPointer);
       setInterval(this.#move, 300);
     }
   }
   await sleep(2000);
+  addStyle({
+    '#panelMebukichiSettings': {
+      background: 'var(--card)',
+      display: 'none',
+      position: 'fixed',
+      zIndex: 20,
+    },
+    '#panelMebukichiSettings fieldset': {
+      border: 'solid 0.15em',
+      padding: '0.1em 0.3em',
+    },
+    '#panelMebukichiSettings button': {
+      backgroundColor: 'buttonface',
+      borderWidth: '1px',
+      borderColor: 'buttonborder',
+    },
+    '#panelMebukichiSettings div': {
+      display: 'grid',
+    },
+  });
+  d.body.appendChild(prepareElement({
+    tag: 'div',
+    id: 'panelMebukichiSettings',
+    children: [
+      {
+        tag: 'fieldset',
+        children: [
+          {
+            tag: 'legend',
+            children: [
+              {
+                tag: 'button',
+                type: 'button',
+                textContent: '×',
+                events: {
+                  click: () => {
+                    d.body.querySelector('#panelMebukichiSettings').style.display = 'none';
+                  },
+                },
+              },
+              {
+                tag: 'span',
+                textContent: 'めぶきち',
+              },
+            ],
+          },
+          {
+            tag: 'div',
+            children: [
+              {
+                tag: 'fieldset',
+                children: [
+                  {
+                    tag: 'legend',
+                    textContent: 'スプライト',
+                  },
+                  {
+                    tag: 'div',
+                    children: Sprites.map(s => {
+                      return {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'radio',
+                            name: 'Sprite',
+                            checked: settings.Sprite == s,
+                            events: {
+                              change: () => { Mebukichi.setSprite(settings.Sprite = s); },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: s,
+                          },
+                        ],
+                      };
+                    }),
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  }));
+  d.body.addEventListener('dblclick', (ev) => {
+    const panelMebukichiSettings = d.body.querySelector('#panelMebukichiSettings');
+    panelMebukichiSettings.style.display = 'block';
+    panelMebukichiSettings.style.left = `${ev.clientX}px`;
+    panelMebukichiSettings.style.top = `${ev.clientY}px`;
+  });
   const mebukichi = new Mebukichi();
 })(window, document);
