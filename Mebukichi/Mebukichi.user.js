@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-09_13:00
+// @version      2025-11-09_13:01
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -94,10 +94,12 @@
       const dy = Math.sign(Math.floor((this.#targetY - this.#mebY) / 16));
       this.#mebX += dx * Mebukichi.#stride;
       this.#mebY += dy * Mebukichi.#stride;
-      this.#elmMebukichi.animate(
-        { left: `${this.#mebX}px`, top: `${this.#mebY}px`, },
-        { duration: 1000, fill: 'forwards' }
-      );
+      if (dx != 0 || dy != 0) {
+        this.#elmMebukichi.animate(
+          { left: `${this.#mebX}px`, top: `${this.#mebY}px`, },
+          { duration: 1000, fill: 'forwards' }
+        );
+      }
       const sprite = Mebukichi.#sprites[Mebukichi.#getDirection(dx, dy)];
       if (!sprite) { return; }
       this.#cycle = (this.#cycle + 1) % Mebukichi.#cycleMax;
