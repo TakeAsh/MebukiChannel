@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-09_13:01
+// @version      2025-11-09_13:20
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -214,6 +214,12 @@
     ],
   }));
   d.body.addEventListener('dblclick', (ev) => {
+    // doesn't show menu in message-container
+    let elm = ev.target;
+    while (elm && !elm.classList.contains('message-container')) {
+      elm = elm.parentElement;
+    }
+    if (elm) { return; }
     const panelMebukichiSettings = d.body.querySelector('#panelMebukichiSettings');
     panelMebukichiSettings.style.display = 'block';
     panelMebukichiSettings.style.left = `${ev.clientX}px`;
