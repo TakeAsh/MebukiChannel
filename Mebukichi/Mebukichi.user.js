@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-09_13:21
+// @version      2025-11-09_22:00
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -29,6 +29,7 @@
     static #sizeSprite = 120;
     static #sprites = {};
     static #cycleMax = 4;
+    static #roughness = 16;
     static #stride = 16;
     #elmMebukichi = prepareElement({
       tag: 'div',
@@ -90,11 +91,12 @@
       this.#targetY = ev.clientY;
     };
     #move = () => {
-      const dx = Math.sign(Math.floor((this.#targetX - this.#mebX) / 16));
-      const dy = Math.sign(Math.floor((this.#targetY - this.#mebY) / 16));
-      this.#mebX += dx * Mebukichi.#stride;
-      this.#mebY += dy * Mebukichi.#stride;
-      if (dx != 0 || dy != 0) {
+      const dx = Math.floor((this.#targetX - this.#mebX) / Mebukichi.#roughness);
+      const dy = Math.floor((this.#targetY - this.#mebY) / Mebukichi.#roughness);
+      const length = Math.sqrt(dx * dx + dy * dy);
+      if (length > 0) {
+        this.#mebX += Mebukichi.#stride * dx / length;
+        this.#mebY += Mebukichi.#stride * dy / length;
         this.#elmMebukichi.animate(
           { left: `${this.#mebX}px`, top: `${this.#mebY}px`, },
           { duration: 1000, fill: 'forwards' }
