@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-09_22:00
+// @version      2025-11-14_14:00
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -26,7 +26,7 @@
       'Front', 'Back', 'UpLeft', 'Up', 'UpRight',
       'Left', 'Right', 'DownLeft', 'Down', 'DownRight'
     );
-    static #sizeSprite = 120;
+    static #sizeSprite = 128;
     static #sprites = {};
     static #cycleMax = 4;
     static #roughness = 16;
