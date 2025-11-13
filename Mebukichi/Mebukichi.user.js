@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-14_14:00
+// @version      2025-11-14_01:01
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -91,7 +91,7 @@
       this.#targetY = ev.clientY;
     };
     #move = () => {
-      const dx = Math.floor((this.#targetX - this.#mebX) / Mebukichi.#roughness);
+      const dx = Math.floor(((this.#targetX + 64) - this.#mebX) / Mebukichi.#roughness);
       const dy = Math.floor((this.#targetY - this.#mebY) / Mebukichi.#roughness);
       const length = Math.sqrt(dx * dx + dy * dy);
       if (length > 0) {
