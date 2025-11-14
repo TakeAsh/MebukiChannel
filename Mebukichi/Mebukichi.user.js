@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-14_01:01
+// @version      2025-11-15_07:30
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -17,7 +17,10 @@
 (async (w, d) => {
   'use strict';
   const urlSpritesBase = 'https://www.takeash.net/MebukiChannel/Mebukichi/img';
-  const Sprites = new CyclicEnum('Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0');
+  const Sprites = new CyclicEnum(
+    'Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',
+    'Ballom1', 'Ballom2',
+  );
   const settings = new AutoSaveConfig({
     Sprite: Sprites.Mebukichi3,
   }, 'MebukichiSettings');
