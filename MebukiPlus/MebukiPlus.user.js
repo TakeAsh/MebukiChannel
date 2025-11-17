@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-07_22:00
+// @version      2025-11-17_21:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -18,6 +18,13 @@
   const urlCustomEmoji = 'https://mebuki.moe/api/custom-emoji';
   const urlEmoji = 'https://mebuki.moe/assets/emoji-data-CJuCqmpZ.js';
   const urlFavion = '/favicon.ico';
+  const SpCmd = {
+    '623': '\u{1f409}', '421': '\u{1f409}',
+    '236': '\u{1f4a8}', '214': '\u{1f4a8}',
+    '426': '\u{1f525}', '624': '\u{1f525}',
+    '4\.268': '\u{1f30c}', '6\.248': '\u{1f30c}',
+  };
+  const regSpCmd = new RegExp(`([0-9\\:\\.]*?)(${Object.keys(SpCmd).join('|')})$`);
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
@@ -538,12 +545,21 @@
       .filter(elm => !elm.dataset.checkZorome)
       .forEach(elm => {
         elm.dataset.checkZorome = 1;
-        const after = elm.innerHTML.replace(
+        const after1 = elm.innerHTML.replace(
+          regSpCmd,
+          (match, p1, p2) => `${p1}<span class="MebukiPlus_Highlight">${p2}${SpCmd[p2]}</span>`
+        );
+        if (elm.innerHTML != after1) {
+          elm.innerHTML = after1;
+          return;
+        }
+        const after2 = elm.innerHTML.replace(
           /([0-9\:\.]*?)((\d)(\3|\:|\.)+)$/,
           '$1<span class="MebukiPlus_Highlight">$2</span>'
         );
-        if (elm.innerHTML != after) {
-          elm.innerHTML = after;
+        if (elm.innerHTML != after2) {
+          elm.innerHTML = after2;
+          return;
         }
       });
   }
