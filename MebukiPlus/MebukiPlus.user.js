@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-17_21:00
+// @version      2025-11-18_21:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -22,9 +22,10 @@
     '623': '\u{1f409}', '421': '\u{1f409}',
     '236': '\u{1f4a8}', '214': '\u{1f4a8}',
     '426': '\u{1f525}', '624': '\u{1f525}',
-    '4\.268': '\u{1f30c}', '6\.248': '\u{1f30c}',
+    '4.268': '\u{1f30c}', '6.248': '\u{1f30c}',
   };
-  const regSpCmd = new RegExp(`([0-9\\:\\.]*?)(${Object.keys(SpCmd).join('|')})$`);
+  const keysSpCmd = Object.keys(SpCmd).map(cmd => quotemeta(cmd)).join('|');
+  const regSpCmd = new RegExp(`([0-9\\:\\.]*?)(${keysSpCmd})$`);
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
