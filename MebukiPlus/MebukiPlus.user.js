@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-18_21:00
+// @version      2025-11-21_22:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -111,6 +111,11 @@
     '#MebukiPlus_Body > fieldset > div': {
       display: 'grid',
     },
+    '#MebukiPlus_Body button': {
+      color: 'ButtonText',
+      backgroundColor: 'ButtonFace',
+      border: '2px ButtonBorder solid',
+    },
     '.MebukiPlus_Highlight': {
       color: '#ff0000', fontSize: '125%',
     },
@@ -187,7 +192,8 @@
       `.MebukiPlus_DiceHighlight { background-color: ${color}; }`;
   }
   function modify(target) {
-    const header = d.body.querySelector('main > header > div');
+    const header = d.body.querySelector('main > header > div')
+      || d.body.querySelector('main > form > header > div');
     addPanel(header);
     const elmLinkIcon = d.head.querySelector('link[rel="icon"]');
     const elmMessageContainer = d.body.querySelector('.message-container');
@@ -443,6 +449,32 @@
                   },
                 ],
               },
+              {
+                tag: 'fieldset',
+                children: [
+                  {
+                    tag: 'legend',
+                    textContent: 'ピックアップ',
+                  },
+                  {
+                    tag: 'div',
+                    children: [
+                      {
+                        tag: 'button',
+                        type: 'button',
+                        textContent: 'エクスポート',
+                        events: { click: exportPickupWords, },
+                      },
+                      {
+                        tag: 'button',
+                        type: 'button',
+                        textContent: 'ソート',
+                        events: { click: sortPickupWords, },
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
           },
         ],
@@ -580,5 +612,21 @@
             }
           });
       });
+  }
+  function getInputsPickupWord() {
+    return Array.from(d.querySelectorAll('input[name^="catalogPickupWords["]'));
+  }
+  function exportPickupWords(ev) {
+    const inputs = getInputsPickupWord();
+    if (!inputs || inputs.length <= 0) { return; }
+    const words = inputs.map(i => i.value);
+    words.unshift('## カタログピックアップワード');
+    alert(words.join('\n'));
+  }
+  function sortPickupWords(ev) {
+    const inputs = getInputsPickupWord();
+    if (!inputs || inputs.length <= 0) { return; }
+    const words = inputs.map(i => i.value).sort((a, b) => a.localeCompare(b));
+    inputs.forEach((inp, i) => { inp.value = words[i]; });
   }
 })(window, document);
