@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-21_22:00
+// @version      2025-11-22_07:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -31,6 +31,7 @@
     PopupEmoji: true,
     ThreadThumbnail: true,
     DropTime: true,
+    SelectToQuote: true,
     ZoromePicker: true,
     DiceHighlight: '#a0ffa0',
     Dice: {
@@ -163,6 +164,18 @@
       },
     });
   }
+  if (settings.SelectToQuote) {
+    d.body.addEventListener('mouseup', (ev) => {
+      if (!settings.SelectToQuote) { return; }
+      if (!isInMessageContainer(ev.target)) { return; }
+      const selectedText = d.selection?.createRange()?.text
+        || w.getSelection()?.toString();
+      if (!selectedText) { return; }
+      const textarea = d.querySelector('textarea[name="content"]');
+      if (!textarea) { return; }
+      textarea.value += `${selectedText.split(/\n+/).map(line => `>${line}`).join('\n')}\n`;
+    });
+  }
   watchTarget(modify, d.body);
 
   async function getEmojis() {
@@ -190,6 +203,12 @@
   function setDiceHighlight(color) {
     cssDiceHighlight.textContent =
       `.MebukiPlus_DiceHighlight { background-color: ${color}; }`;
+  }
+  function isInMessageContainer(elm) {
+    while (elm && !elm.classList.contains('message-container')) {
+      elm = elm.parentElement;
+    }
+    return elm;
   }
   function modify(target) {
     const header = d.body.querySelector('main > header > div')
@@ -332,6 +351,24 @@
                           {
                             tag: 'span',
                             textContent: '落ち',
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'SelectToQuote',
+                            checked: settings.SelectToQuote,
+                            events: {
+                              change: (ev) => { settings.SelectToQuote = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: '選択引用',
                           },
                         ],
                       },
