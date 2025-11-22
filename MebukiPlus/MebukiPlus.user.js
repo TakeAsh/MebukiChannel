@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-22_07:30
+// @version      2025-11-22_18:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -165,11 +165,10 @@
     });
   }
   if (settings.SelectToQuote) {
-    d.body.addEventListener('mouseup', (ev) => {
+    d.body.addEventListener('pointerup', (ev) => {
       if (!settings.SelectToQuote) { return; }
       if (!isInMessageContainer(ev.target)) { return; }
-      const selectedText = d.selection?.createRange()?.text
-        || w.getSelection()?.toString();
+      const selectedText = flattenNodes(d.getSelection()?.getRangeAt(0)?.cloneContents()?.childNodes);
       if (!selectedText) { return; }
       const textarea = d.querySelector('textarea[name="content"]');
       if (!textarea) { return; }
@@ -209,6 +208,30 @@
       elm = elm.parentElement;
     }
     return elm;
+  }
+  function flattenNodes(nodes) {
+    if (!nodes || nodes.length <= 0) { return ''; }
+    return Array.from(nodes).map(node => {
+      const name = node.nodeName.toLowerCase();
+      return node.nodeType == Node.TEXT_NODE ? node.nodeValue :
+        node.nodeType == Node.ELEMENT_NODE ? (
+          name == 'br' ? '\n' :
+            name == 'button' ? '' :
+              name == 'span' ? spanToText(node) :
+                name == 'img' ? imgToTag(node) :
+                  flattenNodes(node.childNodes)) :
+          '';
+    }).join('');
+  }
+  function imgToTag(node) {
+    if (node.src.indexOf('twemoji') >= 0) { return node.alt; }
+    const id = node.src.replace(/^.*\/emojis\//, '').replace(/\.[^\.]+$/, '');
+    return `<:${node.alt}:${id}>`;
+  }
+  function spanToText(node) {
+    return node.classList.contains('opacity-0')
+      ? node.textContent.replace(/./g, '_')
+      : flattenNodes(node.childNodes);
   }
   function modify(target) {
     const header = d.body.querySelector('main > header > div')
