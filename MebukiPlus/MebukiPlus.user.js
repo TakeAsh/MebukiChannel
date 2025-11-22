@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-22_18:00
+// @version      2025-11-22_18:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -209,29 +209,28 @@
     }
     return elm;
   }
-  function flattenNodes(nodes) {
+  function flattenNodes(nodes, isSpoiled) {
     if (!nodes || nodes.length <= 0) { return ''; }
     return Array.from(nodes).map(node => {
       const name = node.nodeName.toLowerCase();
-      return node.nodeType == Node.TEXT_NODE ? node.nodeValue :
+      return node.nodeType == Node.TEXT_NODE ? (
+        isSpoiled
+          ? node.nodeValue.replace(/./g, '_')
+          : node.nodeValue) :
         node.nodeType == Node.ELEMENT_NODE ? (
-          name == 'br' ? '\n' :
-            name == 'button' ? '' :
-              name == 'span' ? spanToText(node) :
-                name == 'img' ? imgToTag(node) :
-                  flattenNodes(node.childNodes)) :
+          name == 'span' ? flattenNodes(node.childNodes, isSpoiled || node.classList.contains('transition-opacity')) :
+            name == 'img' ? imgToTag(node, isSpoiled) :
+              name == 'br' ? '\n' :
+                name == 'button' ? '' :
+                  flattenNodes(node.childNodes, isSpoiled)) :
           '';
     }).join('');
   }
-  function imgToTag(node) {
+  function imgToTag(node, isSpoiled) {
+    if (isSpoiled) { return '_'; }
     if (node.src.indexOf('twemoji') >= 0) { return node.alt; }
     const id = node.src.replace(/^.*\/emojis\//, '').replace(/\.[^\.]+$/, '');
     return `<:${node.alt}:${id}>`;
-  }
-  function spanToText(node) {
-    return node.classList.contains('opacity-0')
-      ? node.textContent.replace(/./g, '_')
-      : flattenNodes(node.childNodes);
   }
   function modify(target) {
     const header = d.body.querySelector('main > header > div')
