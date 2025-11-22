@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-22_18:30
+// @version      2025-11-22_19:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -219,10 +219,12 @@
           : node.nodeValue) :
         node.nodeType == Node.ELEMENT_NODE ? (
           name == 'span' ? flattenNodes(node.childNodes, isSpoiled || node.classList.contains('transition-opacity')) :
-            name == 'img' ? imgToTag(node, isSpoiled) :
-              name == 'br' ? '\n' :
-                name == 'button' ? '' :
-                  flattenNodes(node.childNodes, isSpoiled)) :
+            name == 'div' ? `${flattenNodes(node.childNodes, isSpoiled)}\n` :
+              name == 'a' && node.classList.contains('pspw-item') ? '' :
+                name == 'img' ? imgToTag(node, isSpoiled) :
+                  name == 'br' ? '\n' :
+                    name == 'button' ? '' :
+                      flattenNodes(node.childNodes, isSpoiled)) :
           '';
     }).join('');
   }
