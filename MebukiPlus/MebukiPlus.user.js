@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-22_19:00
+// @version      2025-11-24_10:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -17,7 +17,7 @@
   'use strict';
   const urlCustomEmoji = 'https://mebuki.moe/api/custom-emoji';
   const urlEmoji = 'https://mebuki.moe/assets/emoji-data-CJuCqmpZ.js';
-  const urlFavion = '/favicon.ico';
+  const urlFavion = `${location.origin}/favicon.ico`;
   const SpCmd = {
     '623': '\u{1f409}', '421': '\u{1f409}',
     '236': '\u{1f4a8}', '214': '\u{1f4a8}',
@@ -553,7 +553,8 @@
   }
   function addThreadThumbnail(header, elmMessageContainer) {
     if (!settings.ThreadThumbnail) { return; }
-    const elmAPspwItem = elmMessageContainer.querySelector('a[class="pspw-item"]');
+    const elmTitleImage = elmMessageContainer.querySelector('a[class="pspw-item"]')
+      || elmMessageContainer.querySelector('img[src*="attachments"]');
     let elmThreadThumbnail = header.querySelector('#MebukiPlus_ThreadThumbnail');
     if (!elmThreadThumbnail) {
       elmThreadThumbnail = prepareElement({
@@ -562,7 +563,9 @@
       });
       header.insertBefore(elmThreadThumbnail, header.firstElementChild);
     }
-    return (elmThreadThumbnail.src = (elmAPspwItem?.href || urlFavion));
+    return elmThreadThumbnail.src && elmThreadThumbnail.src != urlFavion
+      ? elmThreadThumbnail.src
+      : (elmThreadThumbnail.src = (elmTitleImage?.href || elmTitleImage?.src || urlFavion));
   }
   function showDropTime(header, target) {
     if (!settings.DropTime) { return; }
