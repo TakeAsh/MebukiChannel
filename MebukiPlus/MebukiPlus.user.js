@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-24_10:00
+// @version      2025-11-28_04:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -46,9 +46,9 @@
       Callback: (match, p1, p2, p3, p4) => `${p1} <span style="background-color: rgb(${p2},${p3},${p4});">　　　</span>`,
     },
     Candidate: {
-      Reg: /(?<head>[\s\S]+?)(?<dice><span\sclass="message-dice"><span\sclass="formula">dice(?<num>\d+)d(?<faces>\d+)=<\/span><span\sclass="answer">(?<answers>(\d+\s)+)\(\d+\)<\/span><\/span>)/g,
+      Reg: /(?<head>[\s\S]+?)(?<dice><span\sclass="message-dice"><span\sclass="formula">dice(?<num>\d+)d(?<faces>\d+)=<\/span><span\sclass="answer">(?<answers>[^<]+)<\/span><\/span>)/g,
       Callback: (match, p1, p2, p3, p4, p5) => {
-        p5.trim().split(/\s+/)
+        p5.replace(/\s+\(\d+\)$/, '').trim().split(/\s+/)
           .map(answer => parseInt(answer))
           .forEach(answer => {
             const after = p1.replace(
@@ -71,8 +71,8 @@
       },
     },
     Onigiri: {
-      Reg: /(?<dice>おにぎり[\s\S]+?dice\d+d\d+=[\s\S]*?>(?<answer>(\d+\s)+)\(\d+\)<[^>]+>)/giu,
-      Callback: (match, p1, p2) => `${p1} ` + p2.trim().split(/\s+/)
+      Reg: /(?<dice>おにぎり[\s\S]+?dice\d+d\d+=[\s\S]*?>(?<answer>[^<]+)<[^>]+>)/giu,
+      Callback: (match, p1, p2) => `${p1} ` + p2.replace(/\s+\(\d+\)$/, '').trim().split(/\s+/)
         .map(ans => `<span class="MebukiPlus_DiceHighlight">${ans ** 2}</span>個`)
         .join(' '),
     },
