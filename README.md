@@ -8,7 +8,7 @@
   - 本番環境ヨシ！
 - [Bookmarklet](https://github.com/TakeAsh/MebukiChannel/blob/main/MebukiPlus/MebukiPlus.bookmarklet.js)
 Mebuki Plus スクリプトをスマホで動かす
-  1. 上のURLの内容を「すべて選択」して「コピー」する<br><img alt="01" height="400" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/Bookmarklet01.jpg">
+  1. `Raw`ボタンの隣のボタン`Copy raw file`で内容をコピーする
   1. ページをブックマークしてすかさず編集
   1. URLは一旦全消去してからさっきの内容をペースト
   1. ニックネームを「Mebuki Plus」にする
@@ -20,21 +20,21 @@ Mebuki Plus スクリプトをスマホで動かす
   1. 適用完了<br><img alt="04" height="400" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/Bookmarklet04.jpg">
 
 ### 機能
-- 設定
-- カタログポップアップ
-- 絵文字ポップアップ
-- スレッドサムネイル表示, favicon表示
-- スレ落ち時刻, レス数表示
-- スレタイトルポップアップ
+- 設定<br><img alt="Settings" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/Settings.jpg">
+- カタログポップアップ<br><img alt="CatalogPopup" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/CatalogPopup.jpg">
+- 絵文字ポップアップ<br><img alt="EmojiPopup" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/EmojiPopup.jpg">
+- スレッドサムネイル表示, favicon表示, スレ落ち時刻, レス数表示<br><img alt="ThreadThumbnail" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/ThreadThumbnail.jpg">
+- スレタイトルポップアップ<br><img alt="ThreadTitlePopup" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/ThreadTitlePopup.jpg">
 - レス選択で引用としてレス欄へコピペ
-- ゾロ目ピックアップ
+- ゾロ目ピックアップ<br><img alt="ZoromePuckup" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/ZoromePuckup.jpg">
 - ゾロ目必殺技コマンドピックアップ
-  - 昇竜拳(623, 421)
-  - 波動拳(236, 214)
-  - ヨガフレイム(426, 624)
-  - スクリューパイルドライバー(4.268, 6.248)
+  - 昇竜拳(623, 421)<br><img alt="ShouryuKen" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/ShouryuKen.jpg">
+  - 波動拳(236, 214)<br><img alt="HadouKen" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/HadouKen.jpg">
+  - ヨガフレイム(426, 624)<br><img alt="YogaFlame" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/YogaFlame.jpg">
+  - スクリューパイルドライバー(4.268, 6.248)<br><img alt="ScrewPileDriver" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/ScrewPileDriver.jpg">
 - ダイス補助
   - 選択結果強調表示(範囲指定対応, 複数選択可, 強調色指定可)
   - RGB値可視化
   - おにぎりダブルアップチャンス！！<br>このおにぎりWアップチャンスは出た目の２乗個が貰えます。<br>目が100なら、１万個のおにぎりが貰えます……
+  - 例<br><img alt="DiceSupport" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/DiceSupport.jpg">
 - カタログピックアップワードのエクスポート, ソート
