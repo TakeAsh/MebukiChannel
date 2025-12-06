@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-28_04:30
+// @version      2025-12-06_22:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -29,7 +29,6 @@
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
-    ThreadThumbnail: true,
     DropTime: true,
     SelectToQuote: true,
     ZoromePicker: true,
@@ -144,17 +143,6 @@
       },
     });
   }
-  if (settings.ThreadThumbnail) {
-    addStyle({
-      '#MebukiPlus_ThreadThumbnail': {
-        marginBottom: 'auto',
-        height: '3em',
-      },
-      '#MebukiPlus_ThreadThumbnail:hover': {
-        height: '12em',
-      },
-    });
-  }
   if (settings.DropTime) {
     addStyle({
       '#MebukiPlus_DropTime': {
@@ -238,18 +226,15 @@
     const header = d.body.querySelector('main > header > div')
       || d.body.querySelector('main > form > header > div');
     addPanel(header);
-    const elmLinkIcon = d.head.querySelector('link[rel="icon"]');
     const elmMessageContainer = d.body.querySelector('.message-container');
     if (elmMessageContainer) {
       // Thread
-      elmLinkIcon.href = addThreadThumbnail(header, elmMessageContainer) || urlFavion;
       showDropTime(header, target);
       addEmojiTitlePopup(target);
       pickupZorome(target);
       modifyDice(target);
     } else {
       // Catalog
-      elmLinkIcon.href = urlFavion;
       addThreadTitlePopup(target);
     }
   }
@@ -259,7 +244,7 @@
     if (elmLast && elmLast.children.length == 0) {
       elmLast.style.display = 'none';
     }
-    const elmTitle = header.querySelector('.line-clamp-1');
+    const elmTitle = header.querySelector('.line-clamp-2');
     if (elmTitle) {
       const parent = elmTitle.parentNode;
       parent.classList.add('popupTitle');
@@ -342,24 +327,6 @@
                   {
                     tag: 'div',
                     children: [
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'ThreadThumbnail',
-                            checked: settings.ThreadThumbnail,
-                            events: {
-                              change: (ev) => { settings.ThreadThumbnail = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'サムネイル',
-                          },
-                        ],
-                      },
                       {
                         tag: 'label',
                         children: [
@@ -550,22 +517,6 @@
         elm.dataset.checkThreadThumbnail = 1;
         elm.title = elm.querySelector('.text-sm').textContent;
       });
-  }
-  function addThreadThumbnail(header, elmMessageContainer) {
-    if (!settings.ThreadThumbnail) { return; }
-    const elmTitleImage = elmMessageContainer.querySelector('a[class="pspw-item"]')
-      || elmMessageContainer.querySelector('img[src*="attachments"]');
-    let elmThreadThumbnail = header.querySelector('#MebukiPlus_ThreadThumbnail');
-    if (!elmThreadThumbnail) {
-      elmThreadThumbnail = prepareElement({
-        tag: 'img',
-        id: 'MebukiPlus_ThreadThumbnail',
-      });
-      header.insertBefore(elmThreadThumbnail, header.firstElementChild);
-    }
-    return elmThreadThumbnail.src && elmThreadThumbnail.src != urlFavion
-      ? elmThreadThumbnail.src
-      : (elmThreadThumbnail.src = (elmTitleImage?.href || elmTitleImage?.src || urlFavion));
   }
   function showDropTime(header, target) {
     if (!settings.DropTime) { return; }
