@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-12-06_22:30
+// @version      2025-12-08_22:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -129,7 +129,7 @@
         position: 'relative',
       },
       '.catalog-image:hover': {
-        width: 'initial', height: '12em', position: 'absolute', zIndex: 20,
+        width: '12em', height: '12em', position: 'absolute', zIndex: 20,
       },
     });
   }
