@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-12-13_02:30
+// @version      2025-12-13_02:31
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -517,7 +517,7 @@
                           },
                           {
                             tag: 'span',
-                            textContent: 'ギンガマン',
+                            textContent: 'ギンガ',
                           },
                         ],
                       },
