@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-12-13_02:31
+// @version      2025-12-13_11:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -79,30 +79,32 @@
     Ginga: {
       Reg: /(ギンガ)([\s\S]+?dice4d4=[\s\S]*?>(?<answer1>[^<]+)<[^>]+>)([\s\S]+?dice3d4=[\s\S]*?>(?<answer2>[^<]+)<[^>]+>)([\s\S]+?dice5d4=[\s\S]*?>(?<answer3>[^<]+)<[^>]+>)/giu,
       Callback: (match, p1, p2, p3, p4, p5, p6, p7) => {
-        const gMap = ['-', '', '', '', ''];
+        const getAnswer = (ans) => ans.replace(/\s\(\d+\)$/, '')
+          .split(/\s/)
+          .map(a => parseInt(a));
+        const ans1 = getAnswer(p3);
+        const ans2 = getAnswer(p5);
+        const ans3 = getAnswer(p7);
+        const gingaMap = ['-', '', '', '', ''];
         const available = ['マ', 'ン', 'ギ', 'ガ'];
-        const ans1 = p3.replace(/\s\(\d+\)$/, '').split(/\s/);
-        const ans2 = p5.replace(/\s\(\d+\)$/, '').split(/\s/);
-        const ans3 = p7.replace(/\s\(\d+\)$/, '').split(/\s/);
         let idx = -1;
-        gMap[ans3[3]] = available.shift();
-        gMap[ans3[4]] ||= available.shift();
-        gMap[ans3[0]] ||= (idx = available.indexOf('ギ')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans3[1]] ||= (idx = available.indexOf('ン')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans3[2]] ||= (idx = available.indexOf('ガ')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans1[0]] ||= (idx = available.indexOf('ガ')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans1[1]] ||= (idx = available.indexOf('ン')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans1[2]] ||= (idx = available.indexOf('ガ')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans1[3]] ||= (idx = available.indexOf('ン')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans2[0]] ||= (idx = available.indexOf('ギ')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans2[1]] ||= (idx = available.indexOf('ギ')) >= 0 ? available.splice(idx, 1) : available.shift();
-        gMap[ans2[2]] ||= (idx = available.indexOf('ン')) >= 0 ? available.splice(idx, 1) : available.shift();
-        return [
-          p1,
-          `${p2.replace(/\s\(\d+\)/, '')} ${ans1.map(x => gMap[x]).join('')}`,
-          `${p4.replace(/\s\(\d+\)/, '')} ${ans2.map(x => gMap[x]).join('')}`,
-          `${p6.replace(/\s\(\d+\)/, '')} ${ans3.map(x => gMap[x]).join('')}`,
-        ].join('');
+        const getChar = (c) => (idx = available.indexOf(c)) >= 0
+          ? available.splice(idx, 1)
+          : available.shift();
+        gingaMap[ans3[3]] = getChar('マ');
+        gingaMap[ans3[4]] ||= getChar('ン');
+        gingaMap[ans3[0]] ||= getChar('ギ');
+        gingaMap[ans3[1]] ||= getChar('ン');
+        gingaMap[ans3[2]] ||= getChar('ガ');
+        gingaMap[ans1[0]] ||= getChar('ガ');
+        gingaMap[ans1[1]] ||= getChar('ン');
+        gingaMap[ans1[2]] ||= getChar('ガ');
+        gingaMap[ans1[3]] ||= getChar('ン');
+        gingaMap[ans2[0]] ||= getChar('ギ');
+        gingaMap[ans2[1]] ||= getChar('ギ');
+        gingaMap[ans2[2]] ||= getChar('ン');
+        const decode = (p, a) => `${p.replace(/\(\d+\)/, '')}${a.map(x => gingaMap[x]).join('')}`;
+        return [p1, decode(p2, ans1), decode(p4, ans2), decode(p6, ans3),].join('');
       },
     },
   };
