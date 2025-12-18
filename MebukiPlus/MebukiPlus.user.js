@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-12-13_11:00
+// @version      2025-12-19_06:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -30,6 +30,7 @@
     PopupCatalog: true,
     PopupEmoji: true,
     DropTime: true,
+    ResNumAnchor: true,
     SelectToQuote: true,
     ZoromePicker: true,
     DiceHighlight: '#a0ffa0',
@@ -110,6 +111,8 @@
   };
   const emojis = await getEmojis();
   await sleep(2000);
+  const messageIds = [];
+  const anchors = {};
   const cssDiceHighlight = d.createElement('style');
   d.head.appendChild(cssDiceHighlight);
   setDiceHighlight(settings.DiceHighlight);
@@ -181,6 +184,31 @@
         color: 'var(--muted-foreground)',
         fontSize: 'var(--text-xs)',
         marginBottom: 'auto',
+      },
+    });
+  }
+  if (settings.ResNumAnchor) {
+    addStyle({
+      '.MebukiPlus_ResNumAnchor': {
+        display: 'inline-block',
+      },
+      '.MebukiPlus_ResNumAnchor > summary': {
+        fontWeight: 'bold',
+      },
+      '.MebukiPlus_ResNumAnchor > div': {
+        backgroundColor: 'oklch(99.55% .0222 106.8)',
+      },
+      '.MebukiPlus_panelReturnAnchors': {
+        backgroundColor: 'color-mix(in oklab,var(--background)50%,transparent)',
+      },
+      '.MebukiPlus_ancReturn': {
+        margin: '0em 0.2em',
+      },
+      '.MebukiPlus_ancReturn:hover': {
+        color: '#ff0000',
+      },
+      '.message-container': {
+        scrollMarginTop: '15vh',
       },
     });
   }
@@ -263,6 +291,7 @@
       // Thread
       showDropTime(header, target);
       addEmojiTitlePopup(target);
+      processAnchor(target);
       pickupZorome(target);
       modifyDice(target);
     } else {
@@ -374,6 +403,24 @@
                           {
                             tag: 'span',
                             textContent: '落ち',
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'ResNumAnchor',
+                            checked: settings.ResNumAnchor,
+                            events: {
+                              change: (ev) => { settings.ResNumAnchor = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'アンカー',
                           },
                         ],
                       },
@@ -636,6 +683,69 @@
         const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
         elm.title = emojis[key] || key;
       });
+  }
+  function processAnchor(target) {
+    if (!settings.ResNumAnchor) { return; }
+    Array.from(target.querySelectorAll('.message-container'))
+      .filter(elm => !elm.dataset.checkAnchor)
+      .forEach(elm => {
+        elm.dataset.checkAnchor = 1;
+        const elmResNum = elm.querySelector('.text-destructive');
+        const resNum = elmResNum
+          ? parseInt(elmResNum.textContent)
+          : 0;
+        messageIds[resNum] = elm.id;
+        if (anchors[resNum]) {
+          anchors[resNum].forEach(anchor => {
+            linkAnchor(d.getElementById(anchor[0]).querySelector('.message-content'), anchor[0], anchor[1]);
+          });
+          delete anchors[resNum];
+        }
+        linkAnchor(elm.querySelector('.message-content'), elm.id, resNum);
+      });
+  }
+  function linkAnchor(content, id, resNum) {
+    const after = content.innerHTML
+      .replace(/(?<!&gt;)&gt;&gt;(\d+?)(?=\D)/g,
+        (match, p1) => {
+          const messageId = messageIds[parseInt(p1)] || '';
+          if (messageId) {
+            const container = d.getElementById(messageId);
+            let divReturnAnchors = container.querySelector('.MebukiPlus_panelReturnAnchors');
+            if (!divReturnAnchors) {
+              divReturnAnchors = prepareElement({
+                tag: 'span',
+                classes: ['MebukiPlus_panelReturnAnchors'],
+              });
+              container.appendChild(divReturnAnchors);
+            }
+            divReturnAnchors.appendChild(prepareElement({
+              tag: 'a',
+              classes: ['MebukiPlus_ancReturn'],
+              href: `#${id}`,
+              textContent: `>>${resNum}`,
+            }));
+            const content = container.querySelector('.message-content')
+              .cloneNode(true);
+            Array.from(content.querySelectorAll('.my-1'))
+              .forEach(child => { content.removeChild(child); });
+            return [
+              `<details class="MebukiPlus_ResNumAnchor">`,
+              `<summary>${p1} <a href="#${messageId}" title="link to '${p1}'">↗</a></summary>`,
+              `<div>${content.innerHTML}</div>`,
+              `</details>`
+            ].join('');
+          } else {
+            if (!anchors[p1]) {
+              anchors[p1] = [];
+            }
+            anchors[p1].push([id, resNum]);
+            return match;
+          }
+        });
+    if (content.innerHTML != after) {
+      content.innerHTML = after;
+    }
   }
   function pickupZorome(target) {
     if (!settings.ZoromePicker) { return; }
