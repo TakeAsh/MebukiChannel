@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-12-19_06:00
+// @version      2025-12-20_09:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -31,6 +31,7 @@
     PopupEmoji: true,
     DropTime: true,
     ResNumAnchor: true,
+    ResNumAnchorOpen: true,
     SelectToQuote: true,
     ZoromePicker: true,
     DiceHighlight: '#a0ffa0',
@@ -151,6 +152,9 @@
       backgroundColor: 'ButtonFace',
       border: '2px ButtonBorder solid',
     },
+    '.MebukiPlus_MenuSubItem': {
+      margin: '0em 0em 0em 1em',
+    },
     '.MebukiPlus_Highlight': {
       color: '#ff0000', fontSize: '125%',
     },
@@ -196,10 +200,13 @@
         fontWeight: 'bold',
       },
       '.MebukiPlus_ResNumAnchor > div': {
-        backgroundColor: 'oklch(99.55% .0222 106.8)',
+        color: 'var(--foreground)',
+        backgroundColor: 'color-mix(in oklab,var(--background)80%,transparent)',
       },
       '.MebukiPlus_panelReturnAnchors': {
-        backgroundColor: 'color-mix(in oklab,var(--background)50%,transparent)',
+        backgroundColor: 'color-mix(in oklab,var(--background)80%,transparent)',
+        fontSize: 'calc(var(--message-content-font-size)*.75)',
+        margin: '0em 0.3em',
       },
       '.MebukiPlus_ancReturn': {
         margin: '0em 0.2em',
@@ -421,6 +428,25 @@
                           {
                             tag: 'span',
                             textContent: 'アンカー',
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'label',
+                        classes: ['MebukiPlus_MenuSubItem',],
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'ResNumAnchorOpen',
+                            checked: settings.ResNumAnchorOpen,
+                            events: {
+                              change: (ev) => { settings.ResNumAnchorOpen = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'オープン',
                           },
                         ],
                       },
@@ -686,62 +712,80 @@
   }
   function processAnchor(target) {
     if (!settings.ResNumAnchor) { return; }
+    const idToContent = (id) => d.getElementById(id).querySelector('.message-content');
     Array.from(target.querySelectorAll('.message-container'))
       .filter(elm => !elm.dataset.checkAnchor)
       .forEach(elm => {
         elm.dataset.checkAnchor = 1;
         const elmResNum = elm.querySelector('.text-destructive');
-        const resNum = elmResNum
-          ? parseInt(elmResNum.textContent)
-          : 0;
-        messageIds[resNum] = elm.id;
-        if (anchors[resNum]) {
-          anchors[resNum].forEach(anchor => {
-            linkAnchor(d.getElementById(anchor[0]).querySelector('.message-content'), anchor[0], anchor[1]);
-          });
-          delete anchors[resNum];
+        let resNum = 0;
+        if (!elmResNum) {
+          // スレ→スレ遷移の際にキャッシュをクリア
+          messageIds.length = 0;
+          for (const resNum of Object.getOwnPropertyNames(anchors)) {
+            delete anchors[resNum];
+          }
+        } else {
+          resNum = parseInt(elmResNum.textContent);
         }
-        linkAnchor(elm.querySelector('.message-content'), elm.id, resNum);
+        messageIds[resNum] = elm.id;
+        let anchor;
+        if (anchor = anchors[resNum]) {
+          delete anchors[resNum];
+          Object.keys(anchor).sort().forEach(resNum => {
+            const id = anchor[resNum];
+            linkAnchor(idToContent(id), resNum, id);
+          });
+        }
+        linkAnchor(elm.querySelector('.message-content'), resNum, elm.id);
       });
   }
-  function linkAnchor(content, id, resNum) {
+  function linkAnchor(content, resNum, id) {
     const after = content.innerHTML
-      .replace(/(?<!&gt;)&gt;&gt;(\d+?)(?=\D)/g,
+      .replace(/(?<!&gt;)&gt;&gt;(\d+)/g,
         (match, p1) => {
-          const messageId = messageIds[parseInt(p1)] || '';
-          if (messageId) {
-            const container = d.getElementById(messageId);
-            let divReturnAnchors = container.querySelector('.MebukiPlus_panelReturnAnchors');
-            if (!divReturnAnchors) {
-              divReturnAnchors = prepareElement({
-                tag: 'span',
-                classes: ['MebukiPlus_panelReturnAnchors'],
-              });
-              container.appendChild(divReturnAnchors);
-            }
-            divReturnAnchors.appendChild(prepareElement({
+          const resNumTo = parseInt(p1);
+          if (resNumTo == resNum) {
+            return match;
+          }
+          const messageId = messageIds[resNumTo] || '';
+          if (!messageId) {
+            if (!anchors[p1]) { anchors[p1] = {}; }
+            anchors[p1][resNum] = id;
+            return match;
+          }
+          const container = d.getElementById(messageId);
+          let panelReturnAnchors = container.querySelector('.MebukiPlus_panelReturnAnchors');
+          if (!panelReturnAnchors) {
+            panelReturnAnchors = prepareElement({
+              tag: 'span',
+              classes: ['MebukiPlus_panelReturnAnchors'],
+            });
+            container.appendChild(panelReturnAnchors);
+          }
+          let anchored = (panelReturnAnchors.dataset.anchored || '').split(' ');
+          if (!anchored.includes(id)) {
+            anchored.push(id);
+            panelReturnAnchors.dataset.anchored = anchored.join(' ');
+            panelReturnAnchors.appendChild(prepareElement({
               tag: 'a',
               classes: ['MebukiPlus_ancReturn'],
               href: `#${id}`,
               textContent: `>>${resNum}`,
             }));
-            const content = container.querySelector('.message-content')
-              .cloneNode(true);
-            Array.from(content.querySelectorAll('.my-1'))
-              .forEach(child => { content.removeChild(child); });
-            return [
-              `<details class="MebukiPlus_ResNumAnchor">`,
-              `<summary>${p1} <a href="#${messageId}" title="link to '${p1}'">↗</a></summary>`,
-              `<div>${content.innerHTML}</div>`,
-              `</details>`
-            ].join('');
-          } else {
-            if (!anchors[p1]) {
-              anchors[p1] = [];
-            }
-            anchors[p1].push([id, resNum]);
-            return match;
           }
+          const content = container.querySelector('.message-content')
+            .cloneNode(true);
+          Array.from(content.querySelectorAll('.my-1'))
+            .forEach(node => { node.parentNode.removeChild(node); });
+          Array.from(content.querySelectorAll('div > button'))
+            .forEach(node => { node.parentNode.parentNode.removeChild(node.parentNode); });
+          return [
+            `<details class="MebukiPlus_ResNumAnchor" ${settings.ResNumAnchorOpen ? 'open' : ''}>`,
+            `<summary>${p1} <a href="#${messageId}" title="&gt;&gt;'${p1}'">&#x1f517;</a></summary>`,
+            `<div>${content.innerHTML}</div>`,
+            `</details>`
+          ].join('');
         });
     if (content.innerHTML != after) {
       content.innerHTML = after;
