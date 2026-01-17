@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-12-20_09:00
+// @version      2026-01-17_11:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -53,7 +53,18 @@
         p5.replace(/\s+\(\d+\)$/, '').trim().split(/\s+/)
           .map(answer => parseInt(answer))
           .forEach(answer => {
-            const after = p1.replace(
+            let after = p1.replace(
+              /(?<=<br>|\s|\b)((ゾロ|ぞろ)[目メめ][^0-9<]+)/u,
+              (match, q1) => {
+                return String(answer).match(/^(\d)\1+$/)
+                  ? `<span class="MebukiPlus_DiceHighlight">${q1}</span>`
+                  : q1;
+              });
+            if (p1 != after) {
+              p1 = after;
+              return;
+            }
+            after = p1.replace(
               /(?<=<br>|\s|\b)((\d+)-(\d+)\D[^0-9<]+)/gu,
               (match, q1, q2, q3) => {
                 return answer < q2 || q3 < answer
