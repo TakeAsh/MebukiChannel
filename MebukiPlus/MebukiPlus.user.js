@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-01-17_11:30
+// @version      2026-03-03_01:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -32,6 +32,7 @@
     DropTime: true,
     ResNumAnchor: true,
     ResNumAnchorOpen: true,
+    FooterTags: true,
     SelectToQuote: true,
     ZoromePicker: true,
     DiceHighlight: '#a0ffa0',
@@ -125,6 +126,7 @@
   await sleep(2000);
   const messageIds = [];
   const anchors = {};
+  let prevTags = [];
   const cssDiceHighlight = d.createElement('style');
   d.head.appendChild(cssDiceHighlight);
   setDiceHighlight(settings.DiceHighlight);
@@ -303,11 +305,13 @@
   function modify(target) {
     const header = d.body.querySelector('main > header > div')
       || d.body.querySelector('main > form > header > div');
+    const footer = d.body.querySelector('main > main > div:last-child');
     addPanel(header);
     const elmMessageContainer = d.body.querySelector('.message-container');
     if (elmMessageContainer) {
       // Thread
-      showDropTime(header, target);
+      showDropTime(header, footer, target);
+      addFooterTags(footer);
       addEmojiTitlePopup(target);
       processAnchor(target);
       pickupZorome(target);
@@ -458,6 +462,24 @@
                           {
                             tag: 'span',
                             textContent: 'オープン',
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'FooterTags',
+                            checked: settings.FooterTags,
+                            events: {
+                              change: (ev) => { settings.FooterTags = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'フッタータグ',
                           },
                         ],
                       },
@@ -652,9 +674,9 @@
         elm.title = elm.querySelector('.text-sm').textContent;
       });
   }
-  function showDropTime(header, target) {
+  function showDropTime(header, footer, target) {
     if (!settings.DropTime) { return; }
-    const elmDropTimeSrc = d.querySelector('main > main > div:last-child > span');
+    const elmDropTimeSrc = footer.querySelector(':scope > span');
     if (!elmDropTimeSrc) { return; }
     let elmDropTimeDst = header.querySelector('#MebukiPlus_DropTime');
     if (!elmDropTimeDst) {
@@ -710,6 +732,35 @@
         }
       }
     }
+  }
+  function addFooterTags(footer) {
+    if (!settings.FooterTags) { return; }
+    const headerTags = Array.from(d.body.querySelectorAll('main > main > div > div > div > a'));
+    if (prevTags.length == headerTags.length
+      && prevTags.every((a, i) => a.textContent == headerTags[i].textContent)
+    ) { return; }
+    prevTags = headerTags;
+    let divFooterTags = d.body.querySelector('#MebukiPlus_FooterTags');
+    if (!divFooterTags) {
+      divFooterTags = prepareElement({
+        tag: 'div',
+        id: 'MebukiPlus_FooterTags',
+        classes: ['flex', 'flex-wrap', 'gap-x-2',],
+      });
+      footer.appendChild(divFooterTags);
+    }
+    divFooterTags.replaceChildren();
+    headerTags.forEach(a => {
+      divFooterTags.appendChild(prepareElement({
+        tag: 'a',
+        classes: [
+          'inline-flex', 'h-7', 'items-center', 'rounded-md', 'border', 'bg-card',
+          'px-2', 'text-foreground', 'text-sm', 'px-2', 'hover:underline',
+        ],
+        href: a.href,
+        textContent: a.textContent,
+      }));
+    });
   }
   function addEmojiTitlePopup(target) {
     if (!settings.PopupEmoji) { return; }
