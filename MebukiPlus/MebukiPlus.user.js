@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-03_01:00
+// @version      2026-03-03_01:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -318,6 +318,7 @@
       modifyDice(target);
     } else {
       // Catalog
+      prevTags = [];
       addThreadTitlePopup(target);
     }
   }
