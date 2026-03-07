@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-03_01:30
+// @version      2026-03-07_13:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -26,6 +26,16 @@
   };
   const keysSpCmd = Object.keys(SpCmd).map(cmd => quotemeta(cmd)).join('|');
   const regSpCmd = new RegExp(`([0-9\\:\\.]*?)(${keysSpCmd})$`);
+  const omikujiAnswers = [
+    [1, '超大凶<:vader_inv:jnxwnacqdbzvyokp9joultsb>'],
+    [16, '大凶<:kawaisou:uen73fr5ehrwx2sp7e1ru8zr>'],
+    [32, '凶<:pikachu:bjbtveeq88t6gtks4nin9i0e>'],
+    [48, '末吉<:jcb_404_crying:nypqni0elb53pd76033p10ug>'],
+    [64, '吉<:udegumi:oppz6ox70gdcwmxxxis8hoob>'],
+    [82, '小吉<:Kamille_Re:ipiusm9aln9690m73vazwgfl>'],
+    [98, '中吉<:yattaaa:qdpq7z3d6h5pniiuypm93rjd>'],
+    [100, '超大吉<:sugoiwa:v4m03n19e0qecwze0ar82uup>'],
+  ];
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
@@ -41,6 +51,7 @@
       Candidate: true,
       Onigiri: true,
       Ginga: true,
+      MebukiShrine: true,
     },
   }, 'MebukiPlusSettings');
   const Dice = {
@@ -57,7 +68,7 @@
             let after = p1.replace(
               /(?<=<br>|\s|\b)((ゾロ|ぞろ)[目メめ][^0-9<]+)/u,
               (match, q1) => {
-                return String(answer).match(/^(\d)\1+$/)
+                return isZorome(answer)
                   ? `<span class="MebukiPlus_DiceHighlight">${q1}</span>`
                   : q1;
               });
@@ -120,6 +131,12 @@
         const decode = (p, a) => `${p.replace(/\(\d+\)/, '')}${a.map(x => gingaMap[x]).join('')}`;
         return [p1, decode(p2, ans1), decode(p4, ans2), decode(p6, ans3),].join('');
       },
+    },
+    MebukiShrine: {
+      Reg: /めぶき神社[\s\S]+?dice(?:\d+)d100=[\s\S]*?>(?<answer>[^<]+)<[^>]+>/giu,
+      Callback: (match, p1) => `${match} ` + p1.replace(/\s+\(\d+\)$/, '').trim().split(/\s+/)
+        .map(ans => emojitagToImg(omikuji(ans)))
+        .join(' '),
     },
   };
   const emojis = await getEmojis();
@@ -630,6 +647,24 @@
                           },
                         ],
                       },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'DiceMebukiShrine',
+                            checked: settings.Dice.MebukiShrine,
+                            events: {
+                              change: (ev) => { settings.Dice.MebukiShrine = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'めぶき神社',
+                          },
+                        ],
+                      },
                     ],
                   },
                 ],
@@ -894,6 +929,32 @@
             }
           });
       });
+  }
+  function isZorome(num) {
+    return String(num).match(/^(\d)\1+$/);
+  }
+  function emojitagToImg(text) {
+    return text.replace(
+      /<:([^:>]+):([^:>]+)>/giu,
+      [
+        '<span class="custom-emoji">',
+        '<img alt="$1" class="custom-emoji-image" draggable="false" ',
+        'src="https://storage.mebuki.moe/emojis/$2.webp" title="$1">',
+        '</span>',
+      ].join('')
+    );
+  }
+  function omikuji(answer) {
+    if (isZorome(answer)) {
+      return '大吉<:hatanokokoro:n1k1hxy9agpsskkmrx0ibl95>';
+    }
+    answer = parseInt(answer);
+    for (const ans of omikujiAnswers) {
+      if (answer <= ans[0]) {
+        return ans[1];
+      }
+    }
+    return '';
   }
   function getInputsPickupWord() {
     return Array.from(d.querySelectorAll('input[name^="catalogPickupWords["]'));
