@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-07_13:30
+// @version      2026-03-13_23:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -674,7 +674,7 @@
                 children: [
                   {
                     tag: 'legend',
-                    textContent: 'ピックアップ',
+                    textContent: 'PUワード',
                   },
                   {
                     tag: 'div',
@@ -682,14 +682,44 @@
                       {
                         tag: 'button',
                         type: 'button',
+                        value: 'Words',
                         textContent: 'エクスポート',
-                        events: { click: exportPickupWords, },
+                        events: { click: exportPickup, },
                       },
                       {
                         tag: 'button',
                         type: 'button',
+                        value: 'Words',
                         textContent: 'ソート',
-                        events: { click: sortPickupWords, },
+                        events: { click: sortPickup, },
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                tag: 'fieldset',
+                children: [
+                  {
+                    tag: 'legend',
+                    textContent: 'PUタグ',
+                  },
+                  {
+                    tag: 'div',
+                    children: [
+                      {
+                        tag: 'button',
+                        type: 'button',
+                        value: 'Tags',
+                        textContent: 'エクスポート',
+                        events: { click: exportPickup, },
+                      },
+                      {
+                        tag: 'button',
+                        type: 'button',
+                        value: 'Tags',
+                        textContent: 'ソート',
+                        events: { click: sortPickup, },
                       },
                     ],
                   },
@@ -956,20 +986,31 @@
     }
     return '';
   }
-  function getInputsPickupWord() {
-    return Array.from(d.querySelectorAll('input[name^="catalogPickupWords["]'));
+  function getInputsPickup(kind) {
+    return Array.from(d.querySelectorAll(`input[name^="catalogPickup${kind}["]`));
   }
-  function exportPickupWords(ev) {
-    const inputs = getInputsPickupWord();
+  function exportPickup(ev) {
+    const kind = ev.target.value;
+    const kindJ = {
+      Words: 'ワード',
+      Tags: 'タグ',
+    }[kind];
+    const inputs = getInputsPickup(kind);
     if (!inputs || inputs.length <= 0) { return; }
-    const words = inputs.map(i => i.value);
-    words.unshift('## カタログピックアップワード');
-    alert(words.join('\n'));
+    const values = inputs.map(i => i.value);
+    const table = [];
+    let row = [];
+    while ((row = values.splice(0, 3)) && row.length > 0) {
+      table.push(row.join('\t'));
+    }
+    table.unshift(`## カタログピックアップ${kindJ}`);
+    alert(table.join('\n'));
   }
-  function sortPickupWords(ev) {
-    const inputs = getInputsPickupWord();
+  function sortPickup(ev) {
+    const kind = ev.target.value;
+    const inputs = getInputsPickup(kind);
     if (!inputs || inputs.length <= 0) { return; }
-    const words = inputs.map(i => i.value).sort((a, b) => a.localeCompare(b));
-    inputs.forEach((inp, i) => { inp.value = words[i]; });
+    const values = inputs.map(i => i.value).sort((a, b) => a.localeCompare(b));
+    inputs.forEach((inp, i) => { inp.value = values[i]; });
   }
 })(window, document);
