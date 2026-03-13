@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-13_23:30
+// @version      2026-03-14_01:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -52,6 +52,10 @@
       Onigiri: true,
       Ginga: true,
       MebukiShrine: true,
+    },
+    TagfyPickup: {
+      Words: true,
+      Tags: true,
     },
   }, 'MebukiPlusSettings');
   const Dice = {
@@ -168,6 +172,8 @@
     },
     '#MebukiPlus_Body': {
       background: 'var(--card)',
+      maxHeight: '95vh',
+      overflowY: 'scroll',
     },
     '#MebukiPlus_Body > fieldset': {
       border: 'solid 0.15em',
@@ -687,6 +693,24 @@
                         events: { click: exportPickup, },
                       },
                       {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'TagfyPickupWords',
+                            checked: settings.TagfyPickup.Words,
+                            events: {
+                              change: (ev) => { settings.TagfyPickup.Words = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'タグ化',
+                          },
+                        ],
+                      },
+                      {
                         tag: 'button',
                         type: 'button',
                         value: 'Words',
@@ -713,6 +737,24 @@
                         value: 'Tags',
                         textContent: 'エクスポート',
                         events: { click: exportPickup, },
+                      },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'TagfyPickupTags',
+                            checked: settings.TagfyPickup.Tags,
+                            events: {
+                              change: (ev) => { settings.TagfyPickup.Tags = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'タグ化',
+                          },
+                        ],
                       },
                       {
                         tag: 'button',
@@ -997,7 +1039,9 @@
     }[kind];
     const inputs = getInputsPickup(kind);
     if (!inputs || inputs.length <= 0) { return; }
-    const values = inputs.map(i => i.value);
+    const values = settings.TagfyPickup[kind]
+      ? inputs.map(i => `#${i.value}`)
+      : inputs.map(i => i.value);
     const table = [];
     let row = [];
     while ((row = values.splice(0, 3)) && row.length > 0) {
