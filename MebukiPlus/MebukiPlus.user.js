@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-14_01:30
+// @version      2026-03-15_02:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -194,6 +194,19 @@
     '.MebukiPlus_Highlight': {
       color: '#ff0000', fontSize: '125%',
     },
+    '.MebukiPlus_Button': {
+      color: 'var(--secondary-foreground)',
+      backgroundColor: 'var(--secondary)',
+      border: '2px solid',
+      borderStyle: 'outset',
+      borderColor: 'var(--border)',
+      borderRadius: 'calc(var(--radius) - 2px)',
+      margin: '0em 0.3em',
+      paddingInline: 'calc(var(--spacing) * 2.5)',
+    },
+    '.MebukiPlus_Button:hover': {
+      backgroundColor: 'color-mix(in oklab, var(--secondary) 50%, transparent)',
+    },
   });
   if (settings.PopupCatalog) {
     addStyle({
@@ -340,9 +353,16 @@
       pickupZorome(target);
       modifyDice(target);
     } else {
-      // Catalog
       prevTags = [];
-      addThreadTitlePopup(target);
+      if (location.pathname == '/app') {
+        // Catalog
+        addThreadTitlePopup(target);
+      } else if (location.pathname == '/app/settings') {
+        // Settings
+        modifySettings(target);
+      } else {
+        console.log(location.pathname);
+      }
     }
   }
   function addPanel(header) {
@@ -675,98 +695,6 @@
                   },
                 ],
               },
-              {
-                tag: 'fieldset',
-                children: [
-                  {
-                    tag: 'legend',
-                    textContent: 'PUワード',
-                  },
-                  {
-                    tag: 'div',
-                    children: [
-                      {
-                        tag: 'button',
-                        type: 'button',
-                        value: 'Words',
-                        textContent: 'エクスポート',
-                        events: { click: exportPickup, },
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'TagfyPickupWords',
-                            checked: settings.TagfyPickup.Words,
-                            events: {
-                              change: (ev) => { settings.TagfyPickup.Words = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'タグ化',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'button',
-                        type: 'button',
-                        value: 'Words',
-                        textContent: 'ソート',
-                        events: { click: sortPickup, },
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                tag: 'fieldset',
-                children: [
-                  {
-                    tag: 'legend',
-                    textContent: 'PUタグ',
-                  },
-                  {
-                    tag: 'div',
-                    children: [
-                      {
-                        tag: 'button',
-                        type: 'button',
-                        value: 'Tags',
-                        textContent: 'エクスポート',
-                        events: { click: exportPickup, },
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'TagfyPickupTags',
-                            checked: settings.TagfyPickup.Tags,
-                            events: {
-                              change: (ev) => { settings.TagfyPickup.Tags = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'タグ化',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'button',
-                        type: 'button',
-                        value: 'Tags',
-                        textContent: 'ソート',
-                        events: { click: sortPickup, },
-                      },
-                    ],
-                  },
-                ],
-              },
             ],
           },
         ],
@@ -781,6 +709,94 @@
         elm.dataset.checkThreadThumbnail = 1;
         elm.title = elm.querySelector('.text-sm').textContent;
       });
+  }
+  function modifySettings(target) {
+    const legendPickupWords = getNodesByXpath('.//label[text()="ピックアップワード"]', target)[0];
+    if (legendPickupWords && !legendPickupWords.dataset.buttonsAdded) {
+      legendPickupWords.dataset.buttonsAdded = 1;
+      legendPickupWords.parentNode.insertBefore(prepareElement({
+        tag: 'div',
+        children: [
+          {
+            tag: 'button',
+            classes: ['MebukiPlus_Button'],
+            type: 'button',
+            value: 'Words',
+            textContent: 'エクスポート',
+            events: { click: exportPickup, },
+          },
+          {
+            tag: 'label',
+            children: [
+              {
+                tag: 'input',
+                type: 'checkbox',
+                name: 'TagfyPickupWords',
+                checked: settings.TagfyPickup.Words,
+                events: {
+                  change: (ev) => { settings.TagfyPickup.Words = ev.currentTarget.checked; },
+                },
+              },
+              {
+                tag: 'span',
+                textContent: 'タグ化',
+              },
+            ],
+          },
+          {
+            tag: 'button',
+            classes: ['MebukiPlus_Button'],
+            type: 'button',
+            value: 'Words',
+            textContent: 'ソート',
+            events: { click: sortPickup, },
+          },
+        ],
+      }), legendPickupWords.nextElementSibling.nextElementSibling);
+    }
+    const legendPickupTags = getNodesByXpath('.//label[text()="ピックアップタグ"]', target)[0];
+    if (legendPickupTags && !legendPickupTags.dataset.buttonsAdded) {
+      legendPickupTags.dataset.buttonsAdded = 1;
+      legendPickupTags.parentNode.insertBefore(prepareElement({
+        tag: 'div',
+        children: [
+          {
+            tag: 'button',
+            classes: ['MebukiPlus_Button'],
+            type: 'button',
+            value: 'Tags',
+            textContent: 'エクスポート',
+            events: { click: exportPickup, },
+          },
+          {
+            tag: 'label',
+            children: [
+              {
+                tag: 'input',
+                type: 'checkbox',
+                name: 'TagfyPickupTags',
+                checked: settings.TagfyPickup.Tags,
+                events: {
+                  change: (ev) => { settings.TagfyPickup.Tags = ev.currentTarget.checked; },
+                },
+              },
+              {
+                tag: 'span',
+                textContent: 'タグ化',
+              },
+            ],
+          },
+          {
+            tag: 'button',
+            classes: ['MebukiPlus_Button'],
+            type: 'button',
+            value: 'Tags',
+            textContent: 'ソート',
+            events: { click: sortPickup, },
+          },
+        ],
+      }), legendPickupTags.nextElementSibling.nextElementSibling);
+    }
   }
   function showDropTime(header, footer, target) {
     if (!settings.DropTime) { return; }
