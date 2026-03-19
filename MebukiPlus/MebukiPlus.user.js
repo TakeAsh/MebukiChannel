@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-15_02:00
+// @version      2026-03-19_22:20
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -16,7 +16,7 @@
 (async (w, d) => {
   'use strict';
   const urlCustomEmoji = 'https://mebuki.moe/api/custom-emoji';
-  const urlEmoji = 'https://mebuki.moe/assets/emoji-data-CJuCqmpZ.js';
+  const urlEmoji = 'https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@latest/emoji.json';
   const urlFavion = `${location.origin}/favicon.ico`;
   const SpCmd = {
     '623': '\u{1f409}', '421': '\u{1f409}',
@@ -270,8 +270,10 @@
   }
   if (settings.SelectToQuote) {
     d.body.addEventListener('pointerup', (ev) => {
-      if (!settings.SelectToQuote) { return; }
-      if (!isInMessageContainer(ev.target)) { return; }
+      if (!settings.SelectToQuote
+        || !isInMessageContainer(ev.target)
+        || d.getSelection()?.rangeCount <= 0
+      ) { return; }
       const selectedText = flattenNodes(d.getSelection()?.getRangeAt(0)?.cloneContents()?.childNodes);
       if (!selectedText) { return; }
       const textarea = d.querySelector('textarea[name="content"]');
@@ -290,18 +292,18 @@
       },
       {}
     );
-    const resEmoji = await fetch(urlEmoji);
-    const jsonEmoji = /JSON\.parse\(`([^`]+?)`\)/.exec(await resEmoji.text())[1];
-    const emojisFull = JSON.parse(jsonEmoji);
-    const emojis = Object.keys(emojisFull).reduce(
+    /*
+    const resEmoji = await fetch(urlEmoji, { method: 'GET', mode: 'cors', });
+    const emojisFull = await resEmoji.json();
+    const emojis = emojisFull.reduce(
       (acc, cur) => {
-        const e = emojisFull[cur];
-        acc[e.skins[0].unified] = e.name;
+        acc[cur.unified.toLowerCase()] = cur.name;
         return acc;
       },
       customEmojis
     );
-    return emojis;
+    */
+    return customEmojis;
   }
   function setDiceHighlight(color) {
     cssDiceHighlight.textContent =
