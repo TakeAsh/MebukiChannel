@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-20_10:30
+// @version      2026-03-20_14:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -286,20 +286,15 @@
   async function getEmojis() {
     const resCustomEmoji = await fetch(urlCustomEmoji);
     const customEmojis = (await resCustomEmoji.json()).categories[0].emojis.reduce(
-      (acc, cur) => {
-        acc[cur.keywords[0]] = cur.name;
-        return acc;
-      },
+      (acc, cur) => { acc[cur.keywords[0]] = cur.name; return acc; },
       {}
     );
-    const emojisFull = JSON.parse(await GM.getResourceText('EmojiData'));
-    const emojis = emojisFull.reduce(
-      (acc, cur) => {
-        acc[cur.unified.toLowerCase()] = cur.name;
-        return acc;
-      },
-      customEmojis
-    );
+    const emojis = (typeof GM == 'undefined') || (typeof GM.getResourceText != 'function')
+      ? customEmojis
+      : JSON.parse(await GM.getResourceText('EmojiData')).reduce(
+        (acc, cur) => { acc[cur.unified.toLowerCase()] = cur.name; return acc; },
+        customEmojis
+      );
     return emojis;
   }
   function setDiceHighlight(color) {
