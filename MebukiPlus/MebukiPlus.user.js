@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-19_22:20
+// @version      2026-03-20_10:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -10,13 +10,13 @@
 // @require      https://raw.githubusercontent.com/TakeAsh/js-Modules/main/modules/PrepareElement.js
 // @require      https://raw.githubusercontent.com/TakeAsh/js-Modules/main/modules/AutoSaveConfig.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=mebuki.moe
-// @grant        none
+// @resource     EmojiData https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@latest/emoji.json
+// @grant        GM.getResourceText
 // ==/UserScript==
 
 (async (w, d) => {
   'use strict';
   const urlCustomEmoji = 'https://mebuki.moe/api/custom-emoji';
-  const urlEmoji = 'https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@latest/emoji.json';
   const urlFavion = `${location.origin}/favicon.ico`;
   const SpCmd = {
     '623': '\u{1f409}', '421': '\u{1f409}',
@@ -292,9 +292,7 @@
       },
       {}
     );
-    /*
-    const resEmoji = await fetch(urlEmoji, { method: 'GET', mode: 'cors', });
-    const emojisFull = await resEmoji.json();
+    const emojisFull = JSON.parse(await GM.getResourceText('EmojiData'));
     const emojis = emojisFull.reduce(
       (acc, cur) => {
         acc[cur.unified.toLowerCase()] = cur.name;
@@ -302,8 +300,7 @@
       },
       customEmojis
     );
-    */
-    return customEmojis;
+    return emojis;
   }
   function setDiceHighlight(color) {
     cssDiceHighlight.textContent =
