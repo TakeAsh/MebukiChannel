@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-20_14:30
+// @version      2026-03-21_05:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -34,7 +34,7 @@
     [64, '吉<:udegumi:oppz6ox70gdcwmxxxis8hoob>'],
     [82, '小吉<:Kamille_Re:ipiusm9aln9690m73vazwgfl>'],
     [98, '中吉<:yattaaa:qdpq7z3d6h5pniiuypm93rjd>'],
-    [100, '超大吉<:sugoiwa:v4m03n19e0qecwze0ar82uup>'],
+    [100, '超大吉(めぶ吉)<:sugoiwa:v4m03n19e0qecwze0ar82uup>'],
   ];
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
