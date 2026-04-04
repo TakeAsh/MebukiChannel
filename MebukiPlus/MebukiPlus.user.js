@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-03-21_05:00
+// @version      2026-04-04_22:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -36,6 +36,11 @@
     [98, '中吉<:yattaaa:qdpq7z3d6h5pniiuypm93rjd>'],
     [100, '超大吉(めぶ吉)<:sugoiwa:v4m03n19e0qecwze0ar82uup>'],
   ];
+  const keyFavoriteEmojis = 'emoji-mart.favorites';
+  const urlEmojiBase = {
+    custom: 'https://storage.mebuki.moe/emojis',
+    twitter: 'https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@latest/img/twitter/64',
+  };
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
@@ -207,6 +212,29 @@
     '.MebukiPlus_Button:hover': {
       backgroundColor: 'color-mix(in oklab, var(--secondary) 50%, transparent)',
     },
+    '#MebukiPlus_FavoriteEmojisList': {
+      backgroundColor: 'color-mix(in oklab,var(--background) 70%,transparent)',
+    },
+    '.MebukiPlus_EmojiButton': {
+      color: 'var(--secondary-foreground)',
+      backgroundColor: 'var(--secondary)',
+      border: '2px solid',
+      borderStyle: 'outset',
+      borderColor: 'var(--border)',
+      borderRadius: 'calc(var(--radius) - 2px)',
+      margin: '0.2em',
+      width: '3em',
+      height: '3em',
+      verticalAlign: 'middle',
+      wordWrap: 'break-word',
+      lineHeight: 'normal',
+      overflow: 'hidden',
+    },
+    '#MebukiPlus_textFavoriteEmojis': {
+      width: '100%',
+      height: '8em',
+      backgroundColor: 'color-mix(in oklab,var(--popover) 50%,transparent)',
+    },
   });
   if (settings.PopupCatalog) {
     addStyle({
@@ -286,13 +314,27 @@
   async function getEmojis() {
     const resCustomEmoji = await fetch(urlCustomEmoji);
     const customEmojis = (await resCustomEmoji.json()).categories[0].emojis.reduce(
-      (acc, cur) => { acc[cur.keywords[0]] = cur.name; return acc; },
+      (acc, cur) => {
+        acc[cur.keywords[0]] = acc[cur.name] = {
+          name: cur.name,
+          type: 'custom',
+          image: `${cur.keywords[0]}.webp`,
+        };
+        return acc;
+      },
       {}
     );
     const emojis = (typeof GM == 'undefined') || (typeof GM.getResourceText != 'function')
       ? customEmojis
       : JSON.parse(await GM.getResourceText('EmojiData')).reduce(
-        (acc, cur) => { acc[cur.unified.toLowerCase()] = cur.name; return acc; },
+        (acc, cur) => {
+          acc[(cur.non_qualified || cur.unified).toLowerCase()] = acc[cur.short_name] = {
+            name: cur.short_name || cur.name,
+            type: 'twitter',
+            image: cur.image,
+          };
+          return acc;
+        },
         customEmojis
       );
     return emojis;
@@ -353,7 +395,8 @@
         addThreadTitlePopup(target);
       } else if (location.pathname == '/app/settings') {
         // Settings
-        modifySettings(target);
+        modifyCatalogSettings(target);
+        modifyExperimentalSettings(target);
       } else {
         console.log(location.pathname);
       }
@@ -704,7 +747,7 @@
         elm.title = elm.querySelector('.text-sm').textContent;
       });
   }
-  function modifySettings(target) {
+  function modifyCatalogSettings(target) {
     const legendPickupWords = getNodesByXpath('.//label[text()="ピックアップワード"]', target)[0];
     if (legendPickupWords && !legendPickupWords.dataset.buttonsAdded) {
       legendPickupWords.dataset.buttonsAdded = 1;
@@ -790,6 +833,136 @@
           },
         ],
       }), legendPickupTags.nextElementSibling.nextElementSibling);
+    }
+  }
+  function modifyExperimentalSettings(target) {
+    const divExperimental = getNodesByXpath('.//div[text()="実験的機能"]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divExperimental || divExperimental.dataset.buttonsAdded) { return; }
+    divExperimental.dataset.buttonsAdded = 1;
+    divExperimental.appendChild(prepareElement({
+      tag: 'fieldset',
+      classes: ['grid', 'grid-cols-1', 'gap-1.5',],
+      children: [
+        {
+          tag: 'legend',
+          classes: ['inline-flex', 'items-center', 'gap-0.5', 'font-bold', 'text-foreground',],
+          textContent: 'お気に入り絵文字',
+        },
+        {
+          tag: 'div',
+          id: 'MebukiPlus_FavoriteEmojisList',
+        },
+        {
+          tag: 'span',
+          children: [
+            {
+              tag: 'button',
+              classes: ['MebukiPlus_Button'],
+              type: 'button',
+              textContent: 'エクスポート',
+              events: {
+                click: () => {
+                  textFavoriteEmojis.value = localStorage.getItem(keyFavoriteEmojis);
+                },
+              },
+            },
+            {
+              tag: 'button',
+              classes: ['MebukiPlus_Button'],
+              type: 'button',
+              textContent: 'インポート',
+              events: {
+                click: () => {
+                  try {
+                    const textFavorites = textFavoriteEmojis.value;
+                    const favoritesNew = JSON.parse(textFavorites);
+                    if (!Array.isArray(favoritesNew)) { return; }
+                    localStorage.setItem(keyFavoriteEmojis, JSON.stringify(favoritesNew));
+                    makeEmojiButtons();
+                  } catch (err) {
+                    console.log(err);
+                  }
+                },
+              },
+            },
+            {
+              tag: 'button',
+              classes: ['MebukiPlus_Button'],
+              type: 'button',
+              textContent: 'マージ',
+              events: {
+                click: () => {
+                  try {
+                    const textFavorites = textFavoriteEmojis.value;
+                    const favoritesNew = JSON.parse(textFavorites);
+                    if (!Array.isArray(favoritesNew)) { return; }
+                    const favoritesOld = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
+                    const favorites = new Set([...favoritesNew, ...favoritesOld]);
+                    localStorage.setItem(keyFavoriteEmojis, JSON.stringify(Array.from(favorites)));
+                    makeEmojiButtons();
+                  } catch (err) {
+                    console.log(err);
+                  }
+                },
+              },
+            },
+            {
+              tag: 'button',
+              classes: ['MebukiPlus_Button'],
+              type: 'button',
+              textContent: 'クリア',
+              events: {
+                click: () => { textFavoriteEmojis.value = ''; },
+              },
+            },
+          ],
+        },
+        {
+          tag: 'textarea',
+          id: 'MebukiPlus_textFavoriteEmojis',
+          title: 'エクスポート/インポート',
+          placeholder: 'エクスポート/インポート',
+        },
+      ],
+    }));
+    const divFavoriteEmojisList = divExperimental.querySelector('#MebukiPlus_FavoriteEmojisList');
+    const textFavoriteEmojis = divExperimental.querySelector('#MebukiPlus_textFavoriteEmojis');
+    makeEmojiButtons();
+    function makeEmojiButtons() {
+      divFavoriteEmojisList.replaceChildren();
+      JSON.parse(localStorage.getItem(keyFavoriteEmojis)).forEach(name => {
+        const emoji = emojis[name];
+        const surface = !emoji
+          ? { tag: 'span', textContent: name, }
+          : {
+            tag: 'img',
+            src: `${urlEmojiBase[emoji.type]}/${emoji.image}`,
+          };
+        const button = prepareElement({
+          tag: 'button',
+          type: 'button',
+          classes: ['MebukiPlus_EmojiButton',],
+          title: name,
+          value: name,
+          children: [surface],
+          events: { click: moveEmojiTop },
+        });
+        divFavoriteEmojisList.appendChild(button);
+      });
+    }
+    function moveEmojiTop(event) {
+      const button = event.currentTarget;
+      const name = button.value;
+      const div = button.parentElement;
+      div.insertBefore(button, div.firstElementChild);
+      textFavoriteEmojis.value = '';
+      const favorites = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
+      const index = favorites.indexOf(name);
+      if (index >= 0) {
+        favorites.splice(index, 1);
+      }
+      favorites.unshift(name);
+      localStorage.setItem(keyFavoriteEmojis, JSON.stringify(favorites));
     }
   }
   function showDropTime(header, footer, target) {
@@ -887,7 +1060,7 @@
       .forEach(elm => {
         elm.dataset.checkEmoji = 1;
         const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
-        elm.title = emojis[key] || key;
+        elm.title = emojis[key]?.name || key;
       });
   }
   function processAnchor(target) {
