@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-04_22:30
+// @version      2026-04-06_01:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -1005,8 +1005,10 @@
       if (elmDropTimeTime.innerHTML != strDrop) {
         elmDropTimeTime.innerHTML = strDrop;
       }
-      if (!elmDropTimeTime.classList.contains('MebukiPlus_Highlight') && timeDrop - now < 30 * 60 * 1000) {
+      if (timeDrop - now < 30 * 60 * 1000) {
         elmDropTimeTime.classList.add('MebukiPlus_Highlight');
+      } else {
+        elmDropTimeTime.classList.remove('MebukiPlus_Highlight');
       }
     }
     const elmDropTimeRes = elmDropTimeDst.querySelector('#MebukiPlus_DropTime_Res');
