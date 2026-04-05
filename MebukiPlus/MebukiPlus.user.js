@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-06_01:00
+// @version      2026-04-06_02:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -996,19 +996,15 @@
       });
       header.insertBefore(elmDropTimeDst, header.querySelector('div[class*="md:justify-start"]').nextElementSibling);
     }
+    let timeDrop = Number.POSITIVE_INFINITY;
+    let lastRes = 0;
     const elmDropTimeTime = elmDropTimeDst.querySelector('#MebukiPlus_DropTime_Time');
     const m = /\((?<mon>\d+)月(?<day>\d+)日\s(?<hour>\d+):(?<min>\d+)\)/u.exec(elmDropTimeSrc.textContent);
     if (m) {
-      const now = new Date();
-      const timeDrop = new Date(`${now.getFullYear() + (now.getMonth() > parseInt(m.groups.mon) ? 1 : 0)}-${m.groups.mon}-${m.groups.day} ${m.groups.hour}:${m.groups.min}`);
+      timeDrop = new Date(`${now.getFullYear() + (now.getMonth() > parseInt(m.groups.mon) ? 1 : 0)}-${m.groups.mon}-${m.groups.day} ${m.groups.hour}:${m.groups.min}`);
       const strDrop = timeDrop.toLocaleString('ja-jp', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', }).replace(/\s/, '<br>');
       if (elmDropTimeTime.innerHTML != strDrop) {
         elmDropTimeTime.innerHTML = strDrop;
-      }
-      if (timeDrop - now < 30 * 60 * 1000) {
-        elmDropTimeTime.classList.add('MebukiPlus_Highlight');
-      } else {
-        elmDropTimeTime.classList.remove('MebukiPlus_Highlight');
       }
     }
     const elmDropTimeRes = elmDropTimeDst.querySelector('#MebukiPlus_DropTime_Res');
@@ -1016,14 +1012,17 @@
     if (elmLastRes) {
       const elmLastResNo = elmLastRes.querySelector('.text-destructive');
       if (elmLastResNo) {
-        const lastRes = parseInt(elmLastResNo.textContent);
+        lastRes = parseInt(elmLastResNo.textContent);
         if (elmDropTimeRes.textContent != lastRes) {
           elmDropTimeRes.textContent = lastRes;
-          if (lastRes >= 950) {
-            elmDropTimeRes.classList.add('MebukiPlus_Highlight');
-          }
         }
       }
+    }
+    const now = new Date();
+    if (timeDrop - now < 30 * 60 * 1000 || lastRes >= 950) {
+      elmDropTimeTime.classList.add('MebukiPlus_Highlight');
+    } else {
+      elmDropTimeTime.classList.remove('MebukiPlus_Highlight');
     }
   }
   function addFooterTags(footer) {
