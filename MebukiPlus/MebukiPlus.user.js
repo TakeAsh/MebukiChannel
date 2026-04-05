@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-06_02:00
+// @version      2026-04-06_02:01
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -998,6 +998,7 @@
     }
     let timeDrop = Number.POSITIVE_INFINITY;
     let lastRes = 0;
+    const now = new Date();
     const elmDropTimeTime = elmDropTimeDst.querySelector('#MebukiPlus_DropTime_Time');
     const m = /\((?<mon>\d+)月(?<day>\d+)日\s(?<hour>\d+):(?<min>\d+)\)/u.exec(elmDropTimeSrc.textContent);
     if (m) {
@@ -1018,7 +1019,6 @@
         }
       }
     }
-    const now = new Date();
     if (timeDrop - now < 30 * 60 * 1000 || lastRes >= 950) {
       elmDropTimeTime.classList.add('MebukiPlus_Highlight');
     } else {
