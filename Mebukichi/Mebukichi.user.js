@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-15_07:30
+// @version      2026-04-11_08:00
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -21,8 +21,116 @@
     'Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',
     'Ballom1', 'Ballom2',
   );
+  class PageFilter {
+    Pages = {
+      All: {
+        Label: 'すべて',
+        Value: false,
+      },
+      Catalog: {
+        Label: 'カタログ',
+        Value: true,
+        Match: () => location.pathname == '/app',
+      },
+      Settings: {
+        Label: '設定',
+        Value: false,
+        Match: () => location.pathname == '/app/settings',
+      },
+      Blog: {
+        Label: 'お知らせ',
+        Value: false,
+        Match: () => location.pathname.startsWith('/app/blog'),
+      },
+    };
+    Tags = {};
+    constructor(src) {
+      this.assign(src);
+    }
+    toJSON() {
+      return {
+        Pages: Object.keys(this.Pages).reduce((acc, cur) => {
+          acc[cur] = this.Pages[cur].Value;
+          return acc;
+        }, {}),
+        Tags: this.Tags,
+      };
+    }
+    assign(src) {
+      if (!src || !src.Pages || !src.Tags) { return; }
+      Object.keys(src.Pages)
+        .filter(key => this.Pages.hasOwnProperty(key))
+        .forEach(key => { this.Pages[key].Value = src.Pages[key]; });
+      Object.assign(this.Tags, src.Tags);
+    }
+    valueOf() { return this.toJSON(); }
+    get match() {
+      if (this.Pages.All.Value) { return 'All'; }
+      const keyPages = Object.keys(this.Pages).filter(key => key != 'All');
+      for (const key of keyPages) {
+        const page = this.Pages[key];
+        if (page.Value && page.Match()) {
+          return key;
+        }
+      }
+      const headerTags = Array.from(d.body.querySelectorAll('main > main > div > div > div > a'))
+        .map(a => a.textContent);
+      for (const tag of Object.keys(this.Tags)) {
+        if (this.Tags[tag] && headerTags.includes(tag)) {
+          return tag;
+        }
+      }
+      return '';
+    }
+    addPageOptions(div) {
+      div.replaceChildren();
+      Object.keys(this.Pages)
+        .map(key => prepareElement({
+          tag: 'label',
+          children: [
+            {
+              tag: 'input',
+              type: 'checkbox',
+              checked: this.Pages[key].Value,
+              events: {
+                change: (ev) => { this.Pages[key].Value = ev.currentTarget.checked; },
+              },
+            },
+            {
+              tag: 'span',
+              textContent: this.Pages[key].Label,
+            },
+          ],
+        })).forEach(item => { div.appendChild(item); });
+    }
+    addTagOptions(div) {
+      div.replaceChildren();
+      Object.keys(this.Tags)
+        .map(key => prepareElement({
+          tag: 'label',
+          children: [
+            {
+              tag: 'input',
+              type: 'checkbox',
+              checked: this.Tags[key],
+              events: {
+                change: (ev) => { this.Tags[key] = ev.currentTarget.checked; },
+              },
+            },
+            {
+              tag: 'span',
+              textContent: key,
+            },
+          ],
+        })).forEach(item => { div.appendChild(item); });
+    }
+  }
   const settings = new AutoSaveConfig({
     Sprite: Sprites.Mebukichi3,
+    PageFilter: new PageFilter({
+      Pages: { All: false, Catalog: true, Settings: false, Blog: false, },
+      Tags: { 'めぶきち': true, 'バロム': true, 'いもげ': true, },
+    }),
   }, 'MebukichiSettings');
   class Mebukichi {
     static #directions = new CyclicEnum(
@@ -94,6 +202,15 @@
       this.#targetY = ev.clientY;
     };
     #move = () => {
+      if (!settings.PageFilter.match) {
+        if (!this.#elmMebukichi.classList.contains('Mebukichi_hide')) {
+          this.#elmMebukichi.classList.add('Mebukichi_hide');
+        }
+        return;
+      }
+      if (this.#elmMebukichi.classList.contains('Mebukichi_hide')) {
+        this.#elmMebukichi.classList.remove('Mebukichi_hide');
+      }
       const dx = Math.floor(((this.#targetX + 64) - this.#mebX) / Mebukichi.#roughness);
       const dy = Math.floor((this.#targetY - this.#mebY) / Mebukichi.#roughness);
       const length = Math.sqrt(dx * dx + dy * dy);
@@ -134,7 +251,6 @@
   addStyle({
     '#panelMebukichiSettings': {
       background: 'var(--card)',
-      display: 'none',
       position: 'fixed',
       zIndex: 20,
     },
@@ -150,10 +266,14 @@
     '#panelMebukichiSettings div': {
       display: 'grid',
     },
+    '.Mebukichi_hide': {
+      display: 'none',
+    },
   });
   d.body.appendChild(prepareElement({
     tag: 'div',
     id: 'panelMebukichiSettings',
+    classes: ['Mebukichi_hide'],
     children: [
       {
         tag: 'fieldset',
@@ -167,7 +287,7 @@
                 textContent: '×',
                 events: {
                   click: () => {
-                    d.body.querySelector('#panelMebukichiSettings').style.display = 'none';
+                    d.body.querySelector('#panelMebukichiSettings').classList.add('Mebukichi_hide');
                   },
                 },
               },
@@ -212,6 +332,32 @@
                   },
                 ],
               },
+              {
+                tag: 'fieldset',
+                children: [
+                  {
+                    tag: 'legend',
+                    textContent: 'ページ',
+                  },
+                  {
+                    tag: 'div',
+                    id: 'MebukichiSettings_divPages',
+                  },
+                ],
+              },
+              {
+                tag: 'fieldset',
+                children: [
+                  {
+                    tag: 'legend',
+                    textContent: 'タグ',
+                  },
+                  {
+                    tag: 'div',
+                    id: 'MebukichiSettings_divTags',
+                  },
+                ],
+              },
             ],
           },
         ],
@@ -226,9 +372,11 @@
     }
     if (elm) { return; }
     const panelMebukichiSettings = d.body.querySelector('#panelMebukichiSettings');
-    panelMebukichiSettings.style.display = 'block';
+    panelMebukichiSettings.classList.remove('Mebukichi_hide');
     panelMebukichiSettings.style.left = `${ev.clientX}px`;
     panelMebukichiSettings.style.top = `${ev.clientY}px`;
+    settings.PageFilter.addPageOptions(panelMebukichiSettings.querySelector('#MebukichiSettings_divPages'));
+    settings.PageFilter.addTagOptions(panelMebukichiSettings.querySelector('#MebukichiSettings_divTags'));
   });
   const mebukichi = new Mebukichi();
 })(window, document);
