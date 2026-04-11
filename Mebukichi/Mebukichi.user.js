@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-11_08:00
+// @version      2026-04-11_19:00
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -19,7 +19,7 @@
   const urlSpritesBase = 'https://www.takeash.net/MebukiChannel/Mebukichi/img';
   const Sprites = new CyclicEnum(
     'Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',
-    'Ballom1', 'Ballom2',
+    'Ballom1', 'Ballom2', 'KoitoFukumaru0',
   );
   class PageFilter {
     Pages = {
@@ -129,7 +129,7 @@
     Sprite: Sprites.Mebukichi3,
     PageFilter: new PageFilter({
       Pages: { All: false, Catalog: true, Settings: false, Blog: false, },
-      Tags: { 'めぶきち': true, 'バロム': true, 'いもげ': true, },
+      Tags: { 'めぶきち': true, 'バロム': true, 'いもげ': true, 'コイトフクマル': true, },
     }),
   }, 'MebukichiSettings');
   class Mebukichi {
