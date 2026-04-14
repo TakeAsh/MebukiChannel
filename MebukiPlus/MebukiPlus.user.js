@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-06_02:01
+// @version      2026-04-14_23:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -328,11 +328,17 @@
       ? customEmojis
       : JSON.parse(await GM.getResourceText('EmojiData')).reduce(
         (acc, cur) => {
-          acc[(cur.non_qualified || cur.unified).toLowerCase()] = acc[cur.short_name] = {
+          const info = {
             name: cur.short_name || cur.name,
             type: 'twitter',
             image: cur.image,
           };
+          [
+            cur.unified?.toLowerCase(),
+            cur.non_qualified?.toLowerCase(),
+            cur.short_name,
+          ].filter(key => !!key)
+            .forEach(key => { acc[key] = info; });
           return acc;
         },
         customEmojis
