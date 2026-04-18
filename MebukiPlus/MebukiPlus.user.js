@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-14_23:00
+// @version      2026-04-18_09:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -234,6 +234,9 @@
       width: '100%',
       height: '8em',
       backgroundColor: 'color-mix(in oklab,var(--popover) 50%,transparent)',
+    },
+    '.MebukiPlus_Favorite': {
+      border: 'medium inset #ffa916',
     },
   });
   if (settings.PopupCatalog) {
@@ -962,14 +965,17 @@
       const div = button.parentElement;
       div.insertBefore(button, div.firstElementChild);
       textFavoriteEmojis.value = '';
-      const favorites = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
-      const index = favorites.indexOf(name);
-      if (index >= 0) {
-        favorites.splice(index, 1);
-      }
-      favorites.unshift(name);
-      localStorage.setItem(keyFavoriteEmojis, JSON.stringify(favorites));
+      addFavoriteEmoji(name);
     }
+  }
+  function addFavoriteEmoji(name) {
+    const favorites = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
+    const index = favorites.indexOf(name);
+    if (index >= 0) {
+      favorites.splice(index, 1);
+    }
+    favorites.unshift(name);
+    localStorage.setItem(keyFavoriteEmojis, JSON.stringify(favorites));
   }
   function showDropTime(header, footer, target) {
     if (!settings.DropTime) { return; }
@@ -1067,7 +1073,23 @@
       .forEach(elm => {
         elm.dataset.checkEmoji = 1;
         const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
-        elm.title = emojis[key]?.name || key;
+        const name = emojis[key]?.name;
+        elm.title = name || key;
+        if (name) {
+          addLongPressListener(
+            elm,
+            async () => {
+              addFavoriteEmoji(name);
+              for (let i = 0; i < 5; ++i) {
+                elm.classList.add('MebukiPlus_Favorite');
+                await sleep(150);
+                elm.classList.remove('MebukiPlus_Favorite');
+                await sleep(150);
+              }
+            },
+            600
+          );
+        }
       });
   }
   function processAnchor(target) {
