@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-18_18:30
+// @version      2026-04-18_21:20
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -1078,6 +1078,11 @@
         const parent = elm?.parentElement?.parentElement;
         if (parent?.tagName?.toLowerCase() == 'button') {
           parent.classList.add('MebukiPlus_EmojiButton');
+          parent.addEventListener('click', async (ev) => {
+            const button = ev.currentTarget;
+            await sleep(200);
+            button.classList.add('MebukiPlus_EmojiButton');
+          });
         }
         const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
         const name = emojis[key]?.name;
