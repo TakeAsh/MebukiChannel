@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-18_21:20
+// @version      2026-04-19_19:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -44,6 +44,8 @@
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
+    CaptureEmoji: true,
+    DurationLongPress: 600,
     DropTime: true,
     ResNumAnchor: true,
     ResNumAnchorOpen: true,
@@ -488,6 +490,46 @@
                             textContent: '絵文字',
                           },
                         ],
+                      },
+                      {
+                        tag: 'label',
+                        classes: ['MebukiPlus_MenuSubItem',],
+                        title: '長押しでお気に入り絵文字へ追加',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'CaptureEmoji',
+                            checked: settings.CaptureEmoji,
+                            events: {
+                              change: (ev) => { settings.CaptureEmoji = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'お気に入り',
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'span',
+                        textContent: '長押し時間',
+                        title: 'msec'
+                      },
+                      {
+                        tag: 'input',
+                        type: 'range',
+                        min: 500,
+                        max: 2000,
+                        step: 100,
+                        value: settings.DurationLongPress,
+                        title: settings.DurationLongPress,
+                        events: {
+                          input: (ev) => {
+                            const range = ev.currentTarget;
+                            range.title = settings.DurationLongPress = parseInt(range.value);
+                          },
+                        },
                       },
                     ],
                   }
@@ -1087,7 +1129,7 @@
         const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
         const name = emojis[key]?.name;
         elm.title = name || key;
-        if (name) {
+        if (settings.CaptureEmoji && name) {
           addLongPressListener(
             elm,
             async () => {
@@ -1099,7 +1141,7 @@
                 await sleep(150);
               }
             },
-            600
+            settings.DurationLongPress
           );
         }
       });
