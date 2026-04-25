@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-25_15:30
+// @version      2026-04-25_19:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -48,7 +48,6 @@
     DurationLongPress: 600,
     DropTime: true,
     ResNumAnchor: true,
-    ResNumAnchorOpen: true,
     FooterTags: true,
     SelectToQuote: true,
     ZoromePicker: true,
@@ -275,16 +274,6 @@
   }
   if (settings.ResNumAnchor) {
     addStyle({
-      '.MebukiPlus_ResNumAnchor': {
-        display: 'inline-block',
-      },
-      '.MebukiPlus_ResNumAnchor > summary': {
-        fontWeight: 'bold',
-      },
-      '.MebukiPlus_ResNumAnchor > div': {
-        color: 'var(--foreground)',
-        backgroundColor: 'color-mix(in oklab,var(--background)80%,transparent)',
-      },
       '.MebukiPlus_panelReturnAnchors': {
         backgroundColor: 'color-mix(in oklab,var(--background)80%,transparent)',
         fontSize: 'calc(var(--message-content-font-size)*.75)',
@@ -575,25 +564,7 @@
                           {
                             tag: 'span',
                             textContent: 'アンカー',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        classes: ['MebukiPlus_MenuSubItem',],
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'ResNumAnchorOpen',
-                            checked: settings.ResNumAnchorOpen,
-                            events: {
-                              change: (ev) => { settings.ResNumAnchorOpen = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'オープン',
+                            title: '戻りリンク追加',
                           },
                         ],
                       },
@@ -1198,18 +1169,7 @@
               textContent: `>>${resNum}`,
             }));
           }
-          const content = container.querySelector('.message-content')
-            .cloneNode(true);
-          Array.from(content.querySelectorAll('.my-1'))
-            .forEach(node => { node.parentNode.removeChild(node); });
-          Array.from(content.querySelectorAll('div > button'))
-            .forEach(node => { node.parentNode.parentNode.removeChild(node.parentNode); });
-          return [
-            `<details class="MebukiPlus_ResNumAnchor" ${settings.ResNumAnchorOpen ? 'open' : ''}>`,
-            `<summary>${p1} <a href="#${messageId}" title="&gt;&gt;'${p1}'">&#x1f517;</a></summary>`,
-            `<div>${content.innerHTML}</div>`,
-            `</details>`
-          ].join('');
+          return match;
         });
     if (content.innerHTML != after) {
       content.innerHTML = after;
