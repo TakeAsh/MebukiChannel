@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-11_19:00
+// @version      2026-05-02_11:30
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -19,7 +19,14 @@
   const urlSpritesBase = 'https://www.takeash.net/MebukiChannel/Mebukichi/img';
   const Sprites = new CyclicEnum(
     'Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',
+    'Warukichi0',
     'Ballom1', 'Ballom2', 'KoitoFukumaru0',
+  );
+  const Tsunderes = [
+    'Warukichi0', 'Ballom2',
+  ];
+  const Motions = new CyclicEnum(
+    'Oikake', 'Tsundere',
   );
   class PageFilter {
     Pages = {
@@ -126,7 +133,8 @@
     }
   }
   const settings = new AutoSaveConfig({
-    Sprite: Sprites.Mebukichi3,
+    Sprite: Sprites.Warukichi0,
+    Motion: Motions.Oikake,
     PageFilter: new PageFilter({
       Pages: { All: false, Catalog: true, Settings: false, Blog: false, },
       Tags: { 'めぶきち': true, 'バロム': true, 'いもげ': true, 'コイトフクマル': true, },
@@ -185,6 +193,28 @@
       });
       img.src = `${urlSpritesBase}/${name}.png`;
     }
+    static #nextPosition = {
+      Oikake: (targetX, targetY, mebX, mebY) => {
+        const dx = Math.floor(((targetX + 64) - mebX) / Mebukichi.#roughness);
+        const dy = Math.floor((targetY - mebY) / Mebukichi.#roughness);
+        const length = Math.sqrt(dx * dx + dy * dy);
+        return length <= 0
+          ? { dx: 0, dy: 0, length: 0, }
+          : {
+            dx: Mebukichi.#stride * dx / length,
+            dy: Mebukichi.#stride * dy / length,
+            length: length,
+          };
+      },
+      Tsundere: (targetX, targetY, mebX, mebY) => {
+        const dx = Math.floor((targetX - mebX) / Mebukichi.#roughness);
+        const dy = Math.floor((targetY - mebY) / Mebukichi.#roughness);
+        const length = Math.sqrt(dx * dx + dy * dy);
+        return length > 5 ? { dx: dx * 3, dy: dy * 3, length: length, } :
+          length < 4 ? { dx: -dx * 400 / (length + 1), dy: -dy * 400 / (length + 1), length: length, } :
+            { dx: 0, dy: 0, length: 0, };
+      },
+    };
     static #getDirection = (dx, dy) => {
       return dy < 0 && dx < 0 ? this.#directions.UpLeft :
         dy < 0 && dx > 0 ? this.#directions.UpRight :
@@ -211,18 +241,18 @@
       if (this.#elmMebukichi.classList.contains('Mebukichi_hide')) {
         this.#elmMebukichi.classList.remove('Mebukichi_hide');
       }
-      const dx = Math.floor(((this.#targetX + 64) - this.#mebX) / Mebukichi.#roughness);
-      const dy = Math.floor((this.#targetY - this.#mebY) / Mebukichi.#roughness);
-      const length = Math.sqrt(dx * dx + dy * dy);
-      if (length > 0) {
-        this.#mebX += Mebukichi.#stride * dx / length;
-        this.#mebY += Mebukichi.#stride * dy / length;
+      const delta = Mebukichi.#nextPosition[settings.Motion](
+        this.#targetX, this.#targetY, this.#mebX, this.#mebY
+      );
+      if (delta.length > 0) {
+        this.#mebX += delta.dx;
+        this.#mebY += delta.dy;
         this.#elmMebukichi.animate(
           { left: `${this.#mebX}px`, top: `${this.#mebY}px`, },
           { duration: 1000, fill: 'forwards' }
         );
       }
-      const sprite = Mebukichi.#sprites[Mebukichi.#getDirection(dx, dy)];
+      const sprite = Mebukichi.#sprites[Mebukichi.#getDirection(delta.dx, delta.dy)];
       if (!sprite) { return; }
       this.#cycle = (this.#cycle + 1) % Mebukichi.#cycleMax;
       this.#img.src = sprite[this.#cycle];
@@ -319,7 +349,12 @@
                             name: 'Sprite',
                             checked: settings.Sprite == s,
                             events: {
-                              change: () => { Mebukichi.setSprite(settings.Sprite = s); },
+                              change: () => {
+                                Mebukichi.setSprite(settings.Sprite = s);
+                                settings.Motion =
+                                  Tsunderes.includes(String(s)) ? Motions.Tsundere
+                                    : Motions.Oikake;
+                              },
                             },
                           },
                           {
