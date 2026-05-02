@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-05-02_11:30
+// @version      2026-05-02_11:31
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -134,7 +134,7 @@
   }
   const settings = new AutoSaveConfig({
     Sprite: Sprites.Warukichi0,
-    Motion: Motions.Oikake,
+    Motion: Motions.Tsundere,
     PageFilter: new PageFilter({
       Pages: { All: false, Catalog: true, Settings: false, Blog: false, },
       Tags: { 'めぶきち': true, 'バロム': true, 'いもげ': true, 'コイトフクマル': true, },
