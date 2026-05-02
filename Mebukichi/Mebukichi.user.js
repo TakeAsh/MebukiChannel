@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-05-02_11:31
+// @version      2026-05-02_18:45
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -19,11 +19,11 @@
   const urlSpritesBase = 'https://www.takeash.net/MebukiChannel/Mebukichi/img';
   const Sprites = new CyclicEnum(
     'Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',
-    'Warukichi0',
+    'Warukichi2', 'Warukichi1', 'Warukichi0',
     'Ballom1', 'Ballom2', 'KoitoFukumaru0',
   );
   const Tsunderes = [
-    'Warukichi0', 'Ballom2',
+    'Warukichi2', 'Warukichi1', 'Warukichi0', 'Ballom2',
   ];
   const Motions = new CyclicEnum(
     'Oikake', 'Tsundere',
@@ -133,7 +133,7 @@
     }
   }
   const settings = new AutoSaveConfig({
-    Sprite: Sprites.Warukichi0,
+    Sprite: Sprites.Warukichi2,
     Motion: Motions.Tsundere,
     PageFilter: new PageFilter({
       Pages: { All: false, Catalog: true, Settings: false, Blog: false, },
@@ -283,6 +283,8 @@
       background: 'var(--card)',
       position: 'fixed',
       zIndex: 20,
+      maxHeight: '95vh',
+      overflowY: 'scroll',
     },
     '#panelMebukichiSettings fieldset': {
       border: 'solid 0.15em',
