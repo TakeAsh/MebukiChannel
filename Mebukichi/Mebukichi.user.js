@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-05-02_18:45
+// @version      2026-05-03_00:00
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -20,10 +20,11 @@
   const Sprites = new CyclicEnum(
     'Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',
     'Warukichi2', 'Warukichi1', 'Warukichi0',
+    'Mebuzarashi1', 'Mebuzarashi2',
     'Ballom1', 'Ballom2', 'KoitoFukumaru0',
   );
   const Tsunderes = [
-    'Warukichi2', 'Warukichi1', 'Warukichi0', 'Ballom2',
+    'Warukichi2', 'Warukichi1', 'Warukichi0', 'Mebuzarashi2', 'Ballom2',
   ];
   const Motions = new CyclicEnum(
     'Oikake', 'Tsundere',
