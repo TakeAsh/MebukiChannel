@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-05-03_00:00
+// @version      2026-06-07_17:40
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -138,7 +138,10 @@
     Motion: Motions.Tsundere,
     PageFilter: new PageFilter({
       Pages: { All: false, Catalog: true, Settings: false, Blog: false, },
-      Tags: { 'めぶきち': true, 'バロム': true, 'いもげ': true, 'コイトフクマル': true, },
+      Tags: {
+        'めぶきち': true, 'バロム': true, 'めぶざらし': true, 'メブキマン': false,
+        'いもげ': true, 'コイトフクマル': true,
+      },
     }),
   }, 'MebukichiSettings');
   class Mebukichi {
