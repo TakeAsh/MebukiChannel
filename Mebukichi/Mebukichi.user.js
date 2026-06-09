@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-06-07_17:40
+// @version      2026-06-10_04:00
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -23,9 +23,6 @@
     'Mebuzarashi1', 'Mebuzarashi2',
     'Ballom1', 'Ballom2', 'KoitoFukumaru0',
   );
-  const Tsunderes = [
-    'Warukichi2', 'Warukichi1', 'Warukichi0', 'Mebuzarashi2', 'Ballom2',
-  ];
   const Motions = new CyclicEnum(
     'Oikake', 'Tsundere',
   );
@@ -357,15 +354,42 @@
                             events: {
                               change: () => {
                                 Mebukichi.setSprite(settings.Sprite = s);
-                                settings.Motion =
-                                  Tsunderes.includes(String(s)) ? Motions.Tsundere
-                                    : Motions.Oikake;
                               },
                             },
                           },
                           {
                             tag: 'span',
                             textContent: s,
+                          },
+                        ],
+                      };
+                    }),
+                  },
+                ],
+              },
+              {
+                tag: 'fieldset',
+                children: [
+                  {
+                    tag: 'legend',
+                    textContent: '性格',
+                  },
+                  {
+                    tag: 'div',
+                    children: Motions.map(m => {
+                      return {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'radio',
+                            name: 'Motion',
+                            checked: settings.Motion == m,
+                            events: { change: () => { settings.Motion = m; }, },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: m,
                           },
                         ],
                       };
