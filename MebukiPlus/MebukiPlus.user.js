@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-04-25_19:30
+// @version      2026-06-12_00:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -41,6 +41,12 @@
     custom: 'https://storage.mebuki.moe/emojis',
     twitter: 'https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@latest/img/twitter/64',
   };
+  const animals = {
+    cat: '\u{1F431}', dog: '\u{1F436}', inu: '\u{1F436}', fox: '\u{1F98A}',
+    pig: '\u{1F437}', uma: '\u{1F434}', usi: '\u{1F42E}', ebi: '\u{1F990}',
+    ika: '\u{1F991}', kai: '\u{1F41A}', oni: '\u{1F479}',
+  };
+  const regAnimals = new RegExp(`(${Object.keys(animals).join('|')})`, 'gi');
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
@@ -58,6 +64,7 @@
       Onigiri: true,
       Ginga: true,
       MebukiShrine: true,
+      Cat: true,
     },
     TagfyPickup: {
       Words: true,
@@ -147,6 +154,21 @@
       Callback: (match, p1) => `${match} ` + p1.replace(/\s+\(\d+\)$/, '').trim().split(/\s+/)
         .map(ans => emojitagToImg(omikuji(ans)))
         .join(' '),
+    },
+    Cat: {
+      Reg: /\bcat[\s\S]+?dice(\d+)d26=[\s\S]*?>([^<]+)<[^>]+>/giu,
+      Callback: (match, p1, p2) => {
+        if (parseInt(p1) < 3) { return match; }
+        let matched = '';
+        const str = p2.replace(/\s+\(\d+\)$/, '').trim().split(/\s+/)
+          .map(ans => String.fromCodePoint(0x60 + parseInt(ans)))
+          .join('')
+          .replace(regAnimals, (match, p1) => {
+            matched += animals[p1];
+            return `<span class="MebukiPlus_DiceHighlight">${p1}</span>`;
+          });
+        return `${match.replace(/\s+\(\d+\)/, '')} ${!matched ? str : str + matched}`;
+      },
     },
   };
   const emojis = await getEmojis();
@@ -747,6 +769,24 @@
                           {
                             tag: 'span',
                             textContent: 'めぶき神社',
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'DiceCat',
+                            checked: settings.Dice.Cat,
+                            events: {
+                              change: (ev) => { settings.Dice.Cat = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'Cat',
                           },
                         ],
                       },

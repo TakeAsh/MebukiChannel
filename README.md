@@ -25,7 +25,8 @@
   - おにぎりダブルアップチャンス！！<br>このおにぎりWアップチャンスは出た目の２乗個が貰えます。<br>目が100なら、１万個のおにぎりが貰えます……
   - ギンガダイス
   - めぶき神社
-  - 例<br><img alt="DiceSupport" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/DiceSupport.png"><br><img alt="GingaDice" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/GingaDice.png"><br><img alt="MebukiShrine" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/MebukiShrine.png">
+  - Catダイス
+  - 例<br><img alt="DiceSupport" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/DiceSupport.png"><br><img alt="GingaDice" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/GingaDice.png"><br><img alt="MebukiShrine" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/MebukiShrine.png"><br><img alt="Cat" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/CatDice.png">
 - カタログピックアップワード/タグのエクスポート, ソート<br><img alt="PickupWordsTags" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/PickupWordsTags.png">
 - お気に入り絵文字の並べ替え, エクスポート, インポート, マージ<br><img alt="FavoriteEmojis" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/FavoriteEmojis.png">
 
