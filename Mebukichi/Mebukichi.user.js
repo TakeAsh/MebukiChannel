@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-06-10_04:00
+// @version      2026-08-17_22:00
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -21,6 +21,7 @@
     'Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',
     'Warukichi2', 'Warukichi1', 'Warukichi0',
     'Mebuzarashi1', 'Mebuzarashi2',
+    'Kijimuna1',
     'Ballom1', 'Ballom2', 'KoitoFukumaru0',
   );
   const Motions = new CyclicEnum(
