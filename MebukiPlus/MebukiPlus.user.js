@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-08-30_16:00
+// @version      2026-08-30_21:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -971,7 +971,7 @@
   }
   function showDropTime(header, footer, target) {
     if (!settings.DropTime) { return; }
-    const elmDropTimeSrc = footer.querySelector(':scope > span');
+    const elmDropTimeSrc = getNodesByXpath('.//div[contains(text(),"スレ落ち")]', footer)[0];
     if (!elmDropTimeSrc) { return; }
     let elmDropTimeDst = header.querySelector('#MebukiPlus_DropTime');
     if (!elmDropTimeDst) {
