@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-06-12_00:00
+// @version      2026-08-30_16:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -37,10 +37,6 @@
     [100, '超大吉(めぶ吉)<:sugoiwa:v4m03n19e0qecwze0ar82uup>'],
   ];
   const keyFavoriteEmojis = 'emoji-mart.favorites';
-  const urlEmojiBase = {
-    custom: 'https://storage.mebuki.moe/emojis',
-    twitter: 'https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@latest/img/twitter/64',
-  };
   const animals = {
     cat: '\u{1F431}', dog: '\u{1F436}', inu: '\u{1F436}', fox: '\u{1F98A}',
     pig: '\u{1F437}', uma: '\u{1F434}', usi: '\u{1F42E}', ebi: '\u{1F990}',
@@ -49,7 +45,6 @@
   const regAnimals = new RegExp(`(${Object.keys(animals).join('|')})`, 'gi');
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
-    PopupEmoji: true,
     CaptureEmoji: true,
     DurationLongPress: 600,
     DropTime: true,
@@ -225,8 +220,7 @@
     '.MebukiPlus_Button': {
       color: 'var(--secondary-foreground)',
       backgroundColor: 'var(--secondary)',
-      border: '2px solid',
-      borderStyle: 'outset',
+      border: '2px outset',
       borderColor: 'var(--border)',
       borderRadius: 'calc(var(--radius) - 2px)',
       margin: '0em 0.3em',
@@ -234,24 +228,6 @@
     },
     '.MebukiPlus_Button:hover': {
       backgroundColor: 'color-mix(in oklab, var(--secondary) 50%, transparent)',
-    },
-    '#MebukiPlus_FavoriteEmojisList': {
-      backgroundColor: 'color-mix(in oklab,var(--background) 70%,transparent)',
-    },
-    '.MebukiPlus_EmojiButton': {
-      color: 'var(--secondary-foreground)',
-      backgroundColor: 'var(--secondary)',
-      border: '2px solid',
-      borderStyle: 'outset',
-      borderColor: 'var(--border)',
-      borderRadius: 'calc(var(--radius) - 2px)',
-      margin: '0.2em',
-      width: '3em',
-      height: '3em',
-      verticalAlign: 'middle',
-      wordWrap: 'break-word',
-      lineHeight: 'normal',
-      overflow: 'hidden',
     },
     '#MebukiPlus_textFavoriteEmojis': {
       width: '100%',
@@ -272,16 +248,6 @@
       },
       '.catalog-image:hover': {
         width: '12em', height: '12em', position: 'absolute', zIndex: 20,
-      },
-    });
-  }
-  if (settings.PopupEmoji) {
-    addStyle({
-      '.custom-emoji': {
-        pointerEvents: 'auto',
-      },
-      '.custom-emoji:hover > .custom-emoji-image': {
-        width: 'initial', height: '6em', position: 'relative', zIndex: 10,
       },
     });
   }
@@ -406,7 +372,7 @@
       // Thread
       showDropTime(header, footer, target);
       addFooterTags(footer);
-      addEmojiTitlePopup(target);
+      addCaptureEmoji(target);
       processAnchor(target);
       pickupZorome(target);
       modifyDice(target);
@@ -418,7 +384,8 @@
       } else if (location.pathname == '/app/settings') {
         // Settings
         modifyCatalogSettings(target);
-        modifyExperimentalSettings(target);
+        modifyFavoriteEmojiSettings(target);
+        //modifyExperimentalSettings(target);
       } else {
         console.log(location.pathname);
       }
@@ -453,96 +420,6 @@
             tag: 'div',
             id: 'MebukiPlus_Body',
             children: [
-              {
-                tag: 'fieldset',
-                children: [
-                  {
-                    tag: 'legend',
-                    textContent: 'ポップアップ',
-                  },
-                  {
-                    tag: 'div',
-                    children: [
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'PopupCatalog',
-                            checked: settings.PopupCatalog,
-                            events: {
-                              change: (ev) => { settings.PopupCatalog = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'カタログ',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'PopupEmoji',
-                            checked: settings.PopupEmoji,
-                            events: {
-                              change: (ev) => { settings.PopupEmoji = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: '絵文字',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        classes: ['MebukiPlus_MenuSubItem',],
-                        title: '長押しでお気に入り絵文字へ追加',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'CaptureEmoji',
-                            checked: settings.CaptureEmoji,
-                            events: {
-                              change: (ev) => { settings.CaptureEmoji = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'お気に入り',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'span',
-                        textContent: '長押し時間',
-                        title: 'msec'
-                      },
-                      {
-                        tag: 'input',
-                        type: 'range',
-                        min: 500,
-                        max: 2000,
-                        step: 100,
-                        value: settings.DurationLongPress,
-                        title: settings.DurationLongPress,
-                        events: {
-                          input: (ev) => {
-                            const range = ev.currentTarget;
-                            range.title = settings.DurationLongPress = parseInt(range.value);
-                          },
-                        },
-                      },
-                    ],
-                  }
-                ],
-              },
               {
                 tag: 'fieldset',
                 children: [
@@ -810,9 +687,11 @@
       });
   }
   function modifyCatalogSettings(target) {
-    const legendPickupWords = getNodesByXpath('.//label[text()="ピックアップワード"]', target)[0];
-    if (legendPickupWords && !legendPickupWords.dataset.buttonsAdded) {
-      legendPickupWords.dataset.buttonsAdded = 1;
+    const divCatalog = getNodesByXpath('.//div[contains(text(),"カタログ設定")]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divCatalog || divCatalog.dataset.exporterAdded) { return; }
+    divCatalog.dataset.exporterAdded = 1;
+    const legendPickupWords = getNodesByXpath('.//label[text()="ピックアップワード"]', divCatalog)[0];
+    if (legendPickupWords) {
       legendPickupWords.parentNode.insertBefore(prepareElement({
         tag: 'div',
         children: [
@@ -853,9 +732,8 @@
         ],
       }), legendPickupWords.nextElementSibling.nextElementSibling);
     }
-    const legendPickupTags = getNodesByXpath('.//label[text()="ピックアップタグ"]', target)[0];
-    if (legendPickupTags && !legendPickupTags.dataset.buttonsAdded) {
-      legendPickupTags.dataset.buttonsAdded = 1;
+    const legendPickupTags = getNodesByXpath('.//label[text()="ピックアップタグ"]', divCatalog)[0];
+    if (legendPickupTags) {
       legendPickupTags.parentNode.insertBefore(prepareElement({
         tag: 'div',
         children: [
@@ -896,24 +774,54 @@
         ],
       }), legendPickupTags.nextElementSibling.nextElementSibling);
     }
-  }
-  function modifyExperimentalSettings(target) {
-    const divExperimental = getNodesByXpath('.//div[text()="実験的機能"]', target)[0]?.parentNode?.nextElementSibling;
-    if (!divExperimental || divExperimental.dataset.buttonsAdded) { return; }
-    divExperimental.dataset.buttonsAdded = 1;
-    divExperimental.appendChild(prepareElement({
+    divCatalog.appendChild(prepareElement({
       tag: 'fieldset',
       classes: ['grid', 'grid-cols-1', 'gap-1.5',],
       children: [
         {
           tag: 'legend',
           classes: ['inline-flex', 'items-center', 'gap-0.5', 'font-bold', 'text-foreground',],
-          textContent: 'お気に入り絵文字',
+          textContent: 'ポップアップ',
         },
         {
           tag: 'div',
-          id: 'MebukiPlus_FavoriteEmojisList',
+          children: [
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'label',
+                  children: [
+                    {
+                      tag: 'input',
+                      type: 'checkbox',
+                      name: 'PopupCatalog',
+                      checked: settings.PopupCatalog,
+                      events: {
+                        change: (ev) => { settings.PopupCatalog = ev.currentTarget.checked; },
+                      },
+                    },
+                    {
+                      tag: 'span',
+                      textContent: 'マウスホバーでポップアップ',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
+      ],
+    }));
+  }
+  function modifyFavoriteEmojiSettings(target) {
+    const divFavoriteEmoji = getNodesByXpath('.//div[contains(text(),"お気に入り絵文字")]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divFavoriteEmoji || divFavoriteEmoji.dataset.exporterAdded) { return; }
+    divFavoriteEmoji.dataset.exporterAdded = 1;
+    divFavoriteEmoji.appendChild(prepareElement({
+      tag: 'div',
+      classes: ['grid', 'grid-cols-1', 'gap-1.5',],
+      children: [
         {
           tag: 'span',
           children: [
@@ -940,7 +848,6 @@
                     const favoritesNew = JSON.parse(textFavorites);
                     if (!Array.isArray(favoritesNew)) { return; }
                     localStorage.setItem(keyFavoriteEmojis, JSON.stringify(favoritesNew));
-                    makeEmojiButtons();
                   } catch (err) {
                     console.log(err);
                   }
@@ -961,7 +868,6 @@
                     const favoritesOld = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
                     const favorites = new Set([...favoritesNew, ...favoritesOld]);
                     localStorage.setItem(keyFavoriteEmojis, JSON.stringify(Array.from(favorites)));
-                    makeEmojiButtons();
                   } catch (err) {
                     console.log(err);
                   }
@@ -987,39 +893,72 @@
         },
       ],
     }));
-    const divFavoriteEmojisList = divExperimental.querySelector('#MebukiPlus_FavoriteEmojisList');
-    const textFavoriteEmojis = divExperimental.querySelector('#MebukiPlus_textFavoriteEmojis');
-    makeEmojiButtons();
-    function makeEmojiButtons() {
-      divFavoriteEmojisList.replaceChildren();
-      JSON.parse(localStorage.getItem(keyFavoriteEmojis)).forEach(name => {
-        const emoji = emojis[name];
-        const surface = !emoji
-          ? { tag: 'span', textContent: name, }
-          : {
-            tag: 'img',
-            src: `${urlEmojiBase[emoji.type]}/${emoji.image}`,
-          };
-        const button = prepareElement({
-          tag: 'button',
-          type: 'button',
-          classes: ['MebukiPlus_EmojiButton',],
-          title: name,
-          value: name,
-          children: [surface],
-          events: { click: moveEmojiTop },
-        });
-        divFavoriteEmojisList.appendChild(button);
-      });
-    }
-    function moveEmojiTop(event) {
-      const button = event.currentTarget;
-      const name = button.value;
-      const div = button.parentElement;
-      div.insertBefore(button, div.firstElementChild);
-      textFavoriteEmojis.value = '';
-      addFavoriteEmoji(name);
-    }
+    const textFavoriteEmojis = divFavoriteEmoji.querySelector('#MebukiPlus_textFavoriteEmojis');
+    divFavoriteEmoji.appendChild(prepareElement({
+      tag: 'fieldset',
+      classes: ['grid', 'grid-cols-1', 'gap-1.5',],
+      children: [
+        {
+          tag: 'legend',
+          classes: ['inline-flex', 'items-center', 'gap-0.5', 'font-bold', 'text-foreground',],
+          textContent: '長押しでお気に入りへ追加',
+        },
+        {
+          tag: 'div',
+          classes: ['grid'],
+          children: [
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  name: 'CaptureEmoji',
+                  checked: settings.CaptureEmoji,
+                  events: {
+                    change: (ev) => { settings.CaptureEmoji = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: '有効',
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'span',
+                  textContent: '長押し時間(msec)',
+                },
+                {
+                  tag: 'input',
+                  type: 'range',
+                  style: { width: '50%', },
+                  min: 500,
+                  max: 2000,
+                  step: 100,
+                  value: settings.DurationLongPress,
+                  title: settings.DurationLongPress,
+                  events: {
+                    input: (ev) => {
+                      const range = ev.currentTarget;
+                      range.title = settings.DurationLongPress = parseInt(range.value);
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }));
+  }
+  function modifyExperimentalSettings(target) {
+    const divExperimental = getNodesByXpath('.//div[text()="実験的機能"]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divExperimental || divExperimental.dataset.buttonsAdded) { return; }
+    divExperimental.dataset.buttonsAdded = 1;
   }
   function addFavoriteEmoji(name) {
     const favorites = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
@@ -1119,16 +1058,15 @@
       }));
     });
   }
-  function addEmojiTitlePopup(target) {
-    if (!settings.PopupEmoji) { return; }
+  function addCaptureEmoji(target) {
+    if (!settings.CaptureEmoji) { return; }
     Array.from(target.querySelectorAll('.custom-emoji-image'))
       .filter(elm => !elm.dataset.checkEmoji)
       .forEach(elm => {
         elm.dataset.checkEmoji = 1;
         const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
         const name = emojis[key]?.name;
-        elm.title = name || key;
-        if (settings.CaptureEmoji && name) {
+        if (name) {
           addLongPressListener(
             elm,
             async () => {
