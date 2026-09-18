@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-09-19_06:30
+// @version      2026-08-30_21:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -27,14 +27,14 @@
   const keysSpCmd = Object.keys(SpCmd).map(cmd => quotemeta(cmd)).join('|');
   const regSpCmd = new RegExp(`([0-9\\:\\.]*?)(${keysSpCmd})$`);
   const omikujiAnswers = [
-    [1, '超大凶<:vader_inv:>'],
-    [16, '大凶<:kawaisou:>'],
-    [32, '凶<:pikachu:>'],
-    [48, '末吉<:jcb_404_crying:>'],
-    [64, '吉<:udegumi:>'],
-    [82, '小吉<:Kamille_Re:>'],
-    [98, '中吉<:yattaaa:>'],
-    [100, '超大吉(めぶ吉)<:sugoiwa:>'],
+    [1, '超大凶<:vader_inv:jnxwnacqdbzvyokp9joultsb>'],
+    [16, '大凶<:kawaisou:uen73fr5ehrwx2sp7e1ru8zr>'],
+    [32, '凶<:pikachu:bjbtveeq88t6gtks4nin9i0e>'],
+    [48, '末吉<:jcb_404_crying:nypqni0elb53pd76033p10ug>'],
+    [64, '吉<:udegumi:oppz6ox70gdcwmxxxis8hoob>'],
+    [82, '小吉<:Kamille_Re:ipiusm9aln9690m73vazwgfl>'],
+    [98, '中吉<:yattaaa:qdpq7z3d6h5pniiuypm93rjd>'],
+    [100, '超大吉(めぶ吉)<:sugoiwa:v4m03n19e0qecwze0ar82uup>'],
   ];
   const keyFavoriteEmojis = 'emoji-mart.favorites';
   const animals = {
