@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-08-30_21:00
+// @version      2026-09-19_22:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -50,8 +50,8 @@
     DropTime: true,
     ResNumAnchor: true,
     FooterTags: true,
-    SelectToQuote: true,
     ZoromePicker: true,
+    SelectToQuote: true,
     DiceHighlight: '#a0ffa0',
     Dice: {
       RGB: true,
@@ -240,8 +240,8 @@
   });
   if (settings.PopupCatalog) {
     addStyle({
-      '.catalog-item:hover': {
-        transform: 'translate(50%,50%) translate(-6em,-6em)', zIndex: 20,
+      '.catalog-item > a > div:hover': {
+        transform: 'translate(50%,0%) translate(-6em,-7.5em)', zIndex: 20,
       },
       '.catalog-image': {
         position: 'relative',
@@ -381,9 +381,10 @@
       if (location.pathname == '/app') {
         // Catalog
         addThreadTitlePopup(target);
-      } else if (location.pathname == '/app/settings') {
+      } else if (location.pathname.startsWith('/app/settings/')) {
         // Settings
         modifyCatalogSettings(target);
+        modifyThreadSettings(target);
         modifyFavoriteEmojiSettings(target);
         //modifyExperimentalSettings(target);
       } else {
@@ -403,6 +404,7 @@
       parent.classList.add('popupTitle');
       parent.title = elmTitle.textContent;
     }
+    /*
     if (header.querySelector('#MebukiPlus_Main')) { return; }
     header.appendChild(prepareElement({
       tag: 'div',
@@ -420,262 +422,12 @@
             tag: 'div',
             id: 'MebukiPlus_Body',
             children: [
-              {
-                tag: 'fieldset',
-                children: [
-                  {
-                    tag: 'legend',
-                    textContent: 'スレッド',
-                  },
-                  {
-                    tag: 'div',
-                    children: [
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'DropTime',
-                            checked: settings.DropTime,
-                            events: {
-                              change: (ev) => { settings.DropTime = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: '落ち',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'ResNumAnchor',
-                            checked: settings.ResNumAnchor,
-                            events: {
-                              change: (ev) => { settings.ResNumAnchor = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'アンカー',
-                            title: '戻りリンク追加',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'FooterTags',
-                            checked: settings.FooterTags,
-                            events: {
-                              change: (ev) => { settings.FooterTags = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'フッタータグ',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'SelectToQuote',
-                            checked: settings.SelectToQuote,
-                            events: {
-                              change: (ev) => { settings.SelectToQuote = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: '選択引用',
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                tag: 'fieldset',
-                children: [
-                  {
-                    tag: 'legend',
-                    textContent: 'ゾロ目',
-                  },
-                  {
-                    tag: 'div',
-                    children: [
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'ZoromePicker',
-                            checked: settings.ZoromePicker,
-                            events: {
-                              change: (ev) => { settings.ZoromePicker = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'ピックアップ',
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                tag: 'fieldset',
-                children: [
-                  {
-                    tag: 'legend',
-                    textContent: 'ダイス',
-                  },
-                  {
-                    tag: 'div',
-                    children: [
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'DiceRGB',
-                            checked: settings.Dice.RGB,
-                            events: {
-                              change: (ev) => { settings.Dice.RGB = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'RGB',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'DiceCandidate',
-                            checked: settings.Dice.Candidate,
-                            events: {
-                              change: (ev) => { settings.Dice.Candidate = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: '候補',
-                          },
-                          {
-                            tag: 'input',
-                            type: 'color',
-                            value: settings.DiceHighlight,
-                            events: {
-                              input: (ev) => {
-                                setDiceHighlight(settings.DiceHighlight = ev.currentTarget.value);
-                              },
-                            },
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'DiceOnigiri',
-                            checked: settings.Dice.Onigiri,
-                            events: {
-                              change: (ev) => { settings.Dice.Onigiri = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'おにぎり',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'DiceGinga',
-                            checked: settings.Dice.Ginga,
-                            events: {
-                              change: (ev) => { settings.Dice.Ginga = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'ギンガ',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'DiceMebukiShrine',
-                            checked: settings.Dice.MebukiShrine,
-                            events: {
-                              change: (ev) => { settings.Dice.MebukiShrine = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'めぶき神社',
-                          },
-                        ],
-                      },
-                      {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'checkbox',
-                            name: 'DiceCat',
-                            checked: settings.Dice.Cat,
-                            events: {
-                              change: (ev) => { settings.Dice.Cat = ev.currentTarget.checked; },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: 'Cat',
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
             ],
           },
         ],
       }],
     }));
+    */
   }
   function addThreadTitlePopup(target) {
     if (!settings.PopupCatalog) { return; }
@@ -687,10 +439,10 @@
       });
   }
   function modifyCatalogSettings(target) {
-    const divCatalog = getNodesByXpath('.//div[contains(text(),"カタログ設定")]', target)[0]?.parentNode?.nextElementSibling;
-    if (!divCatalog || divCatalog.dataset.exporterAdded) { return; }
-    divCatalog.dataset.exporterAdded = 1;
-    const legendPickupWords = getNodesByXpath('.//label[text()="ピックアップワード"]', divCatalog)[0];
+    const divContainer = getNodesByXpath('.//div[contains(text(),"カタログ設定")]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divContainer || divContainer.dataset.MebukiPlusAdded) { return; }
+    divContainer.dataset.MebukiPlusAdded = 1;
+    const legendPickupWords = getNodesByXpath('.//label[text()="ピックアップワード"]', divContainer)[0];
     if (legendPickupWords) {
       legendPickupWords.parentNode.insertBefore(prepareElement({
         tag: 'div',
@@ -732,7 +484,7 @@
         ],
       }), legendPickupWords.nextElementSibling.nextElementSibling);
     }
-    const legendPickupTags = getNodesByXpath('.//label[text()="ピックアップタグ"]', divCatalog)[0];
+    const legendPickupTags = getNodesByXpath('.//label[text()="ピックアップタグ"]', divContainer)[0];
     if (legendPickupTags) {
       legendPickupTags.parentNode.insertBefore(prepareElement({
         tag: 'div',
@@ -774,7 +526,7 @@
         ],
       }), legendPickupTags.nextElementSibling.nextElementSibling);
     }
-    divCatalog.appendChild(prepareElement({
+    divContainer.appendChild(prepareElement({
       tag: 'fieldset',
       classes: ['grid', 'grid-cols-1', 'gap-1.5',],
       children: [
@@ -814,11 +566,264 @@
       ],
     }));
   }
+  function modifyThreadSettings(target) {
+    const divContainer = getNodesByXpath('.//div[contains(text(),"スレ設定")]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divContainer || divContainer.dataset.MebukiPlusAdded) { return; }
+    divContainer.dataset.MebukiPlusAdded = 1;
+    divContainer.appendChild(prepareElement({
+      tag: 'fieldset',
+      classes: ['grid', 'grid-cols-1', 'gap-1.5',],
+      children: [
+        {
+          tag: 'legend',
+          classes: ['inline-flex', 'items-center', 'gap-0.5', 'font-bold', 'text-foreground',],
+          textContent: '表示追加',
+        },
+        {
+          tag: 'div',
+          classes: ['grid'],
+          children: [
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.DropTime,
+                  events: {
+                    change: (ev) => { settings.DropTime = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'スレ落ち時刻',
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.ResNumAnchor,
+                  events: {
+                    change: (ev) => { settings.ResNumAnchor = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: '被アンカー',
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.FooterTags,
+                  events: {
+                    change: (ev) => { settings.FooterTags = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'フッタータグ',
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.ZoromePicker,
+                  events: {
+                    change: (ev) => { settings.ZoromePicker = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'ゾロ目強調',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }));
+    divContainer.appendChild(prepareElement({
+      tag: 'fieldset',
+      classes: ['grid', 'grid-cols-1', 'gap-1.5',],
+      children: [
+        {
+          tag: 'legend',
+          classes: ['inline-flex', 'items-center', 'gap-0.5', 'font-bold', 'text-foreground',],
+          textContent: '選択引用',
+        },
+        {
+          tag: 'div',
+          classes: ['grid'],
+          children: [
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.SelectToQuote,
+                  events: {
+                    change: (ev) => { settings.SelectToQuote = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'マウスで選択した箇所を引用する',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }));
+    divContainer.appendChild(prepareElement({
+      tag: 'fieldset',
+      classes: ['grid', 'grid-cols-1', 'gap-1.5',],
+      children: [
+        {
+          tag: 'legend',
+          classes: ['inline-flex', 'items-center', 'gap-0.5', 'font-bold', 'text-foreground',],
+          textContent: 'ダイスサポート',
+        },
+        {
+          tag: 'div',
+          classes: ['grid'],
+          children: [
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.Dice.RGB,
+                  events: {
+                    change: (ev) => { settings.Dice.RGB = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'RGB',
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.Dice.Candidate,
+                  events: {
+                    change: (ev) => { settings.Dice.Candidate = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: '候補',
+                },
+                {
+                  tag: 'input',
+                  type: 'color',
+                  value: settings.DiceHighlight,
+                  events: {
+                    input: (ev) => {
+                      setDiceHighlight(settings.DiceHighlight = ev.currentTarget.value);
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.Dice.Onigiri,
+                  events: {
+                    change: (ev) => { settings.Dice.Onigiri = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'おにぎり',
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.Dice.Ginga,
+                  events: {
+                    change: (ev) => { settings.Dice.Ginga = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'ギンガ',
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.Dice.MebukiShrine,
+                  events: {
+                    change: (ev) => { settings.Dice.MebukiShrine = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'めぶき神社',
+                },
+              ],
+            },
+            {
+              tag: 'label',
+              children: [
+                {
+                  tag: 'input',
+                  type: 'checkbox',
+                  checked: settings.Dice.Cat,
+                  events: {
+                    change: (ev) => { settings.Dice.Cat = ev.currentTarget.checked; },
+                  },
+                },
+                {
+                  tag: 'span',
+                  textContent: 'Cat',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }));
+  }
   function modifyFavoriteEmojiSettings(target) {
-    const divFavoriteEmoji = getNodesByXpath('.//div[contains(text(),"お気に入り絵文字")]', target)[0]?.parentNode?.nextElementSibling;
-    if (!divFavoriteEmoji || divFavoriteEmoji.dataset.exporterAdded) { return; }
-    divFavoriteEmoji.dataset.exporterAdded = 1;
-    divFavoriteEmoji.appendChild(prepareElement({
+    const divContainer = getNodesByXpath('.//div[contains(text(),"お気に入り絵文字")]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divContainer || divContainer.dataset.MebukiPlusAdded) { return; }
+    divContainer.dataset.MebukiPlusAdded = 1;
+    divContainer.appendChild(prepareElement({
       tag: 'div',
       classes: ['grid', 'grid-cols-1', 'gap-1.5',],
       children: [
@@ -893,8 +898,8 @@
         },
       ],
     }));
-    const textFavoriteEmojis = divFavoriteEmoji.querySelector('#MebukiPlus_textFavoriteEmojis');
-    divFavoriteEmoji.appendChild(prepareElement({
+    const textFavoriteEmojis = divContainer.querySelector('#MebukiPlus_textFavoriteEmojis');
+    divContainer.appendChild(prepareElement({
       tag: 'fieldset',
       classes: ['grid', 'grid-cols-1', 'gap-1.5',],
       children: [
@@ -956,9 +961,9 @@
     }));
   }
   function modifyExperimentalSettings(target) {
-    const divExperimental = getNodesByXpath('.//div[text()="実験的機能"]', target)[0]?.parentNode?.nextElementSibling;
-    if (!divExperimental || divExperimental.dataset.buttonsAdded) { return; }
-    divExperimental.dataset.buttonsAdded = 1;
+    const divContainer = getNodesByXpath('.//div[text()="実験的機能"]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divContainer || divContainer.dataset.MebukiPlusAdded) { return; }
+    divContainer.dataset.MebukiPlusAdded = 1;
   }
   function addFavoriteEmoji(name) {
     const favorites = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
