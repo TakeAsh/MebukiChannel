@@ -4,10 +4,12 @@
 ## Mebuki Plus
 
 ### 機能
-- 設定<br><img alt="Settings" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/Settings.png">
+- 設定
+  - カタログ<br><img alt="Settings Catalog" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/SettingsCatalog.png">
+  - スレッド<br><img alt="Settings Thread" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/SettingsThread.png">
+  - 絵文字<br><img alt="Settings Emojis" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/SettingsEmojis.png">
+  - めぶき農場<br><img alt="MyPage Farm" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/MyPageFarm.png">
 - カタログポップアップ<br><img alt="CatalogPopup" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/CatalogPopup.png">
-- 絵文字ポップアップ<br><img alt="EmojiPopup" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/EmojiPopup.png">
-  - 絵文字長押しで、お気に入りへ追加
 - スレ落ち時刻, レス数表示<br><img alt="ThreadThumbnail" height="200" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/ThreadThumbnail.jpg">
 - アンカー戻りリンク表示
 - フッターにタグを追加
@@ -27,8 +29,7 @@
   - めぶき神社
   - Catダイス
   - 例<br><img alt="DiceSupport" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/DiceSupport.png"><br><img alt="GingaDice" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/GingaDice.png"><br><img alt="MebukiShrine" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/MebukiShrine.png"><br><img alt="Cat" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/CatDice.png">
-- カタログピックアップワード/タグのエクスポート, ソート<br><img alt="PickupWordsTags" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/PickupWordsTags.png">
-- お気に入り絵文字の並べ替え, エクスポート, インポート, マージ<br><img alt="FavoriteEmojis" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/FavoriteEmojis.png">
+- めぶき農場未収穫アラート<br><img alt="Farm Alert PC" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/FooterPC.png"><img alt="Farm Alert SP" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/FooterSP.png">
 
 ### インストール
 - [本体ソース](https://github.com/TakeAsh/MebukiChannel/blob/main/MebukiPlus/MebukiPlus.user.js)
