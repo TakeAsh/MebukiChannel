@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-09-19_22:00
+// @version      2026-09-22_00:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -52,6 +52,7 @@
     FooterTags: true,
     ZoromePicker: true,
     SelectToQuote: true,
+    AddFarmIcon: true,
     DiceHighlight: '#a0ffa0',
     Dice: {
       RGB: true,
@@ -65,6 +66,7 @@
       Words: true,
       Tags: true,
     },
+    LastHarvest: 0,
   }, 'MebukiPlusSettings');
   const Dice = {
     RGB: {
@@ -291,6 +293,14 @@
       textarea.value += `${selectedText.split(/\n+/).map(line => `>${line}`).join('\n')}\n`;
     });
   }
+  if (settings.AddFarmIcon) {
+    addStyle({
+      '#MebukiPlus_canHarvest': {
+        justifyContent: 'center',
+        alignContent: 'center',
+      },
+    });
+  }
   watchTarget(modify, d.body);
 
   async function getEmojis() {
@@ -368,6 +378,7 @@
     const footer = d.body.querySelector('main > main > div:last-child');
     addPanel(header);
     const elmMessageContainer = d.body.querySelector('.message-container');
+    updateFarmIcon();
     if (elmMessageContainer) {
       // Thread
       showDropTime(header, footer, target);
@@ -381,6 +392,9 @@
       if (location.pathname == '/app') {
         // Catalog
         addThreadTitlePopup(target);
+      } else if (location.pathname == '/app/mypage') {
+        // My Page
+        modifyMyPage(target);
       } else if (location.pathname.startsWith('/app/settings/')) {
         // Settings
         modifyCatalogSettings(target);
@@ -437,6 +451,43 @@
         elm.dataset.checkThreadThumbnail = 1;
         elm.title = elm.querySelector('.text-sm').textContent;
       });
+  }
+  function modifyMyPage(target) {
+    const divContainer = getNodesByXpath('.//div[contains(text(),"めぶき農場")]', target)[0]?.parentNode?.nextElementSibling;
+    if (!divContainer || divContainer.dataset.MebukiPlusAdded) { return; }
+    divContainer.dataset.MebukiPlusAdded = 1;
+    divContainer.appendChild(prepareElement({
+      tag: 'label',
+      children: [
+        {
+          tag: 'label',
+          children: [
+            {
+              tag: 'input',
+              type: 'checkbox',
+              checked: settings.AddFarmIcon,
+              events: {
+                change: (ev) => { settings.AddFarmIcon = ev.currentTarget.checked; },
+              },
+            },
+            {
+              tag: 'span',
+              textContent: 'フッターに未収穫アイコンを表示',
+            },
+          ],
+        },
+      ],
+    }));
+    const buttonHarvest = divContainer.querySelector('button[class~="animate-seed-wiggle"]');
+    if (buttonHarvest) {
+      buttonHarvest.addEventListener('click', (ev) => {
+        settings.LastHarvest = Date.now();
+        updateFarmIcon();
+      });
+    } else if (checkCanHarvest()) {
+      settings.LastHarvest = Date.now();
+      updateFarmIcon();
+    }
   }
   function modifyCatalogSettings(target) {
     const divContainer = getNodesByXpath('.//div[contains(text(),"カタログ設定")]', target)[0]?.parentNode?.nextElementSibling;
@@ -1253,5 +1304,41 @@
     if (!inputs || inputs.length <= 0) { return; }
     const values = inputs.map(i => i.value).sort((a, b) => a.localeCompare(b));
     inputs.forEach((inp, i) => { inp.value = values[i]; });
+  }
+  function checkCanHarvest() {
+    const dateNext0 = new Date(settings.LastHarvest + 24 * 60 * 60 * 1000);
+    const dateNext1 = new Date(`${dateNext0.getFullYear()}-${dateNext0.getMonth() + 1}-${dateNext0.getDate()} 00:00`);
+    return Date.now() - dateNext1 >= 0;
+  }
+  function updateFarmIcon() {
+    const container =
+      d.body.querySelector('div[data-slot="sidebar-footer"]') // PC
+      || d.body.querySelector('footer > div'); // SmartPhone
+    if (!settings.AddFarmIcon || !container) { return; }
+    const canHarvest = checkCanHarvest();
+    if (Boolean(container.dataset.mebukiPlusCanHarvest) == canHarvest) { return; }
+    container.dataset.mebukiPlusCanHarvest = canHarvest;
+    if (canHarvest) {
+      const elmCanHarvest = prepareElement({
+        tag: 'a',
+        id: 'MebukiPlus_canHarvest',
+        classes: ['flex'],
+        href: '/app/mypage',
+        children: [
+          {
+            tag: 'img',
+            src: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/2753.svg',
+            title: '未収穫',
+            width: 24,
+            height: 24,
+          },
+        ],
+      });
+      container.insertBefore(elmCanHarvest, container.firstChild);
+    } else {
+      const elmCanHarvest = container.querySelector('#MebukiPlus_canHarvest');
+      if (!elmCanHarvest) { return; }
+      container.removeChild(elmCanHarvest);
+    }
   }
 })(window, document);
