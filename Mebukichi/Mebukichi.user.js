@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki On The Mebukichi
 // @namespace    https://TakeAsh.net/
-// @version      2026-08-17_22:00
+// @version      2026-09-23_16:00
 // @description  call Mebukichi on Mebuki
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -17,13 +17,6 @@
 (async (w, d) => {
   'use strict';
   const urlSpritesBase = 'https://www.takeash.net/MebukiChannel/Mebukichi/img';
-  const Sprites = new CyclicEnum(
-    'Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',
-    'Warukichi2', 'Warukichi1', 'Warukichi0',
-    'Mebuzarashi1', 'Mebuzarashi2',
-    'Kijimuna1',
-    'Ballom1', 'Ballom2', 'KoitoFukumaru0',
-  );
   const Motions = new CyclicEnum(
     'Oikake', 'Tsundere',
   );
@@ -41,7 +34,7 @@
       Settings: {
         Label: '設定',
         Value: false,
-        Match: () => location.pathname == '/app/settings',
+        Match: () => location.pathname.startsWith('/app/settings'),
       },
       Blog: {
         Label: 'お知らせ',
@@ -131,6 +124,86 @@
         })).forEach(item => { div.appendChild(item); });
     }
   }
+  class SpriteInfo {
+    #src = null;
+    #groupElements = null;
+    constructor(src) {
+      this.#src = src;
+      Object.keys(this.#src).forEach(group => {
+        this.#src[group].forEach(s => {
+          Object.defineProperty(this, s, {
+            value: s,
+            enumerable: false,
+            writable: false,
+          });
+        });
+      });
+    }
+
+    set Groups(elms) {
+      if (!elms || !elms.length) { return; }
+      this.#groupElements = Array.from(elms);
+    }
+
+    toMenu() {
+      return {
+        tag: 'div',
+        id: 'MebukichiSprites',
+        children: Object.keys(this.#src).map(group => {
+          return {
+            tag: 'details',
+            children: [
+              {
+                tag: 'summary',
+                textContent: group,
+              },
+              {
+                tag: 'div',
+                classes: ['Mebukichi_SpriteGroup'],
+                children: this.#src[group].map(s => {
+                  return {
+                    tag: 'label',
+                    children: [
+                      {
+                        tag: 'input',
+                        type: 'radio',
+                        name: 'Sprite',
+                        checked: settings.Sprite == s,
+                        events: {
+                          change: () => {
+                            Mebukichi.setSprite(settings.Sprite = s);
+                          },
+                        },
+                      },
+                      {
+                        tag: 'span',
+                        textContent: s,
+                      },
+                    ],
+                  };
+                }),
+              },
+            ],
+            events: {
+              toggle: (ev) => {
+                if (ev.newState != 'open') { return; }
+                this.#groupElements?.filter(detail => detail != ev.currentTarget)
+                  .forEach(detail => { detail.open = false; });
+              },
+            },
+          };
+        }),
+      };
+    }
+  }
+  const Sprites = new SpriteInfo({
+    Mebukichi: ['Mebukichi3', 'Mebukichi2', 'Mebukichi1', 'Mebukichi0',],
+    Warukichi: ['Warukichi2', 'Warukichi1', 'Warukichi0',],
+    Mebuzarashi: ['Mebuzarashi1', 'Mebuzarashi2',],
+    Kijimuna: ['Kijimuna1',],
+    Ballom: ['Ballom1', 'Ballom2',],
+    KoitoFukumaru: ['KoitoFukumaru0',],
+  });
   const settings = new AutoSaveConfig({
     Sprite: Sprites.Warukichi2,
     Motion: Motions.Tsundere,
@@ -268,6 +341,7 @@
           top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)',
           position: 'fixed',
+          zIndex: 25,
         },
         '#MebukichiImg': {
           width: '100%', height: '100%',
@@ -302,6 +376,9 @@
     },
     '.Mebukichi_hide': {
       display: 'none',
+    },
+    '.Mebukichi_SpriteGroup': {
+      margin: '0em 0em 0em 1em',
     },
   });
   d.body.appendChild(prepareElement({
@@ -341,31 +418,7 @@
                     tag: 'legend',
                     textContent: 'スプライト',
                   },
-                  {
-                    tag: 'div',
-                    children: Sprites.map(s => {
-                      return {
-                        tag: 'label',
-                        children: [
-                          {
-                            tag: 'input',
-                            type: 'radio',
-                            name: 'Sprite',
-                            checked: settings.Sprite == s,
-                            events: {
-                              change: () => {
-                                Mebukichi.setSprite(settings.Sprite = s);
-                              },
-                            },
-                          },
-                          {
-                            tag: 'span',
-                            textContent: s,
-                          },
-                        ],
-                      };
-                    }),
-                  },
+                  Sprites.toMenu(),
                 ],
               },
               {
@@ -430,6 +483,7 @@
       },
     ],
   }));
+  Sprites.Groups = d.body.querySelector('#MebukichiSprites')?.querySelectorAll('details');
   d.body.addEventListener('dblclick', (ev) => {
     // doesn't show menu in message-container
     let elm = ev.target;
