@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-09-22_00:00
+// @version      2026-09-24_05:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -173,6 +173,7 @@
   const messageIds = [];
   const anchors = {};
   let prevTags = [];
+  const lastHarvestCheck = { time: 0, result: false, };
   const cssDiceHighlight = d.createElement('style');
   d.head.appendChild(cssDiceHighlight);
   setDiceHighlight(settings.DiceHighlight);
@@ -301,6 +302,11 @@
       },
     });
   }
+  d.addEventListener('visibilitychange', async () => {
+    if (d.visibilityState == 'hidden') { return; }
+    await updateFarmIcon();
+  });
+  await updateFarmIcon();
   watchTarget(modify, d.body);
 
   async function getEmojis() {
@@ -372,13 +378,13 @@
     const id = node.src.replace(/^.*\/emojis\//, '').replace(/\.[^\.]+$/, '');
     return `<:${node.alt}:${id}>`;
   }
-  function modify(target) {
+  async function modify(target) {
     const header = d.body.querySelector('main > header > div')
       || d.body.querySelector('main > form > header > div');
     const footer = d.body.querySelector('main > main > div:last-child');
     addPanel(header);
     const elmMessageContainer = d.body.querySelector('.message-container');
-    updateFarmIcon();
+    await updateFarmIcon();
     if (elmMessageContainer) {
       // Thread
       showDropTime(header, footer, target);
@@ -395,7 +401,7 @@
       } else if (location.pathname == '/app/mypage') {
         // My Page
         modifyMyPage(target);
-      } else if (location.pathname.startsWith('/app/settings/')) {
+      } else if (location.pathname.startsWith('/app/settings')) {
         // Settings
         modifyCatalogSettings(target);
         modifyThreadSettings(target);
@@ -1305,17 +1311,31 @@
     const values = inputs.map(i => i.value).sort((a, b) => a.localeCompare(b));
     inputs.forEach((inp, i) => { inp.value = values[i]; });
   }
-  function checkCanHarvest() {
+  async function checkCanHarvest() {
+    const now = Date.now();
     const dateNext0 = new Date(settings.LastHarvest + 24 * 60 * 60 * 1000);
     const dateNext1 = new Date(`${dateNext0.getFullYear()}-${dateNext0.getMonth() + 1}-${dateNext0.getDate()} 00:00`);
-    return Date.now() - dateNext1 >= 0;
+    if (now < dateNext1) { return false; }
+    if (now - lastHarvestCheck.time < 60 * 1000) { return lastHarvestCheck.result; }
+    const res = await fetch('https://mebuki.moe/app/mypage');
+    if (!res.ok) { return false; }
+    const body = await res.text();
+    const m = body.match(/\banimate-seed-wiggle\b/);
+    lastHarvestCheck.time = now;
+    lastHarvestCheck.result = !!m;
+    if (m) {
+      return true;
+    } else {
+      settings.LastHarvest = now;
+      return false;
+    }
   }
-  function updateFarmIcon() {
+  async function updateFarmIcon() {
     const container =
       d.body.querySelector('div[data-slot="sidebar-footer"]') // PC
       || d.body.querySelector('footer > div'); // SmartPhone
     if (!settings.AddFarmIcon || !container) { return; }
-    const canHarvest = checkCanHarvest();
+    const canHarvest = await checkCanHarvest();
     if (Boolean(container.dataset.mebukiPlusCanHarvest) == canHarvest) { return; }
     container.dataset.mebukiPlusCanHarvest = canHarvest;
     if (canHarvest) {
@@ -1327,7 +1347,7 @@
         children: [
           {
             tag: 'img',
-            src: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/2753.svg',
+            src: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9d1-200d-1f33e.svg',
             title: '未収穫',
             width: 24,
             height: 24,
