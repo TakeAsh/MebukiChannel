@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Iwara Thumbnail
 // @namespace    https://TakeAsh.net/
-// @version      2026-08-23_02:00
+// @version      2026-09-23_10:00
 // @description  show Iwara thumbnail on Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -86,7 +86,7 @@
           if (!m) { return; }
           await action(link, m);
         });
-    } else if (location.pathname == '/app/settings') {
+    } else if (location.pathname.startsWith('/app/settings/')) {
       // Settings
       modifyExperimentalSettings(node);
     }
@@ -146,7 +146,7 @@
     return link;
   }
   function modifyExperimentalSettings(node) {
-    const divExperimental = getNodesByXpath('.//div[text()="実験的機能"]', node)[0]?.parentNode?.nextElementSibling;
+    const divExperimental = getNodesByXpath('.//div[text()="スレ設定"]', node)[0]?.parentNode?.nextElementSibling;
     if (!divExperimental || divExperimental.dataset.iwaraSettingsAdded) { return; }
     divExperimental.dataset.iwaraSettingsAdded = 1;
     divExperimental.appendChild(prepareElement({
