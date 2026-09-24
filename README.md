@@ -29,7 +29,7 @@
   - めぶき神社
   - Catダイス
   - 例<br><img alt="DiceSupport" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/DiceSupport.png"><br><img alt="GingaDice" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/GingaDice.png"><br><img alt="MebukiShrine" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/MebukiShrine.png"><br><img alt="Cat" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/CatDice.png">
-- めぶき農場未収穫アラート<br><img alt="Farm Alert PC" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/FooterPC.png"><img alt="Farm Alert SP" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/FooterSP.jpg">
+- めぶき農場未収穫アラート<br><img alt="Farm Alert PC" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/FooterPC.png"><img alt="Farm Alert SP" src="https://raw.githubusercontent.com/TakeAsh/MebukiChannel/refs/heads/main/MebukiPlus/img/FooterSP.png">
 
 ### インストール
 - [本体ソース](https://github.com/TakeAsh/MebukiChannel/blob/main/MebukiPlus/MebukiPlus.user.js)
