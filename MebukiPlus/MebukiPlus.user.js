@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-09-24_05:00
+// @version      2026-09-27_05:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -1317,11 +1317,11 @@
     const dateNext1 = new Date(`${dateNext0.getFullYear()}-${dateNext0.getMonth() + 1}-${dateNext0.getDate()} 00:00`);
     if (now < dateNext1) { return false; }
     if (now - lastHarvestCheck.time < 60 * 1000) { return lastHarvestCheck.result; }
+    lastHarvestCheck.time = now;
     const res = await fetch('https://mebuki.moe/app/mypage');
     if (!res.ok) { return false; }
     const body = await res.text();
     const m = body.match(/\banimate-seed-wiggle\b/);
-    lastHarvestCheck.time = now;
     lastHarvestCheck.result = !!m;
     if (m) {
       return true;
