@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-09-27_05:30
+// @version      2026-09-28_04:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -1336,8 +1336,8 @@
       || d.body.querySelector('footer > div'); // SmartPhone
     if (!settings.AddFarmIcon || !container) { return; }
     const canHarvest = await checkCanHarvest();
-    if (Boolean(container.dataset.mebukiPlusCanHarvest) == canHarvest) { return; }
-    container.dataset.mebukiPlusCanHarvest = canHarvest;
+    if (container.dataset.mebukiPlusCanHarvest == String(canHarvest)) { return; }
+    container.dataset.mebukiPlusCanHarvest = String(canHarvest);
     if (canHarvest) {
       const elmCanHarvest = prepareElement({
         tag: 'a',
