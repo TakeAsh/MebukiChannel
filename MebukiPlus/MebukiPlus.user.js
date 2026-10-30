@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-09-28_04:00
+// @version      2026-10-30_22:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -311,12 +311,12 @@
 
   async function getEmojis() {
     const resCustomEmoji = await fetch(urlCustomEmoji);
-    const customEmojis = (await resCustomEmoji.json()).categories[0].emojis.reduce(
+    const customEmojis = (await resCustomEmoji.json()).emojis.reduce(
       (acc, cur) => {
-        acc[cur.keywords[0]] = acc[cur.name] = {
+        acc[cur.id] = acc[cur.name] = {
           name: cur.name,
           type: 'custom',
-          image: `${cur.keywords[0]}.webp`,
+          image: `${cur.id}.webp`,
         };
         return acc;
       },
@@ -894,25 +894,10 @@
               textContent: 'エクスポート',
               events: {
                 click: () => {
-                  textFavoriteEmojis.value = localStorage.getItem(keyFavoriteEmojis);
-                },
-              },
-            },
-            {
-              tag: 'button',
-              classes: ['MebukiPlus_Button'],
-              type: 'button',
-              textContent: 'インポート',
-              events: {
-                click: () => {
-                  try {
-                    const textFavorites = textFavoriteEmojis.value;
-                    const favoritesNew = JSON.parse(textFavorites);
-                    if (!Array.isArray(favoritesNew)) { return; }
-                    localStorage.setItem(keyFavoriteEmojis, JSON.stringify(favoritesNew));
-                  } catch (err) {
-                    console.log(err);
-                  }
+                  const div = getNodesByXpath('.//div[contains(text(),"お気に入り絵文字")]')[0]?.parentNode?.nextElementSibling;
+                  const lis = div.querySelector('ul').querySelectorAll('li');
+                  const favoriteEmojis = Array.from(lis).map(li => li.title);
+                  textFavoriteEmojis.value = JSON.stringify(favoriteEmojis);
                 },
               },
             },
@@ -927,7 +912,7 @@
                     const textFavorites = textFavoriteEmojis.value;
                     const favoritesNew = JSON.parse(textFavorites);
                     if (!Array.isArray(favoritesNew)) { return; }
-                    const favoritesOld = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
+                    const favoritesOld = JSON.parse(localStorage.getItem(keyFavoriteEmojis)) || [];
                     const favorites = new Set([...favoritesNew, ...favoritesOld]);
                     localStorage.setItem(keyFavoriteEmojis, JSON.stringify(Array.from(favorites)));
                   } catch (err) {
@@ -950,8 +935,8 @@
         {
           tag: 'textarea',
           id: 'MebukiPlus_textFavoriteEmojis',
-          title: 'エクスポート/インポート',
-          placeholder: 'エクスポート/インポート',
+          title: 'エクスポート/マージ',
+          placeholder: 'エクスポート/マージ',
         },
       ],
     }));
@@ -1023,7 +1008,7 @@
     divContainer.dataset.MebukiPlusAdded = 1;
   }
   function addFavoriteEmoji(name) {
-    const favorites = JSON.parse(localStorage.getItem(keyFavoriteEmojis));
+    const favorites = JSON.parse(localStorage.getItem(keyFavoriteEmojis)) || [];
     const index = favorites.indexOf(name);
     if (index >= 0) {
       favorites.splice(index, 1);
