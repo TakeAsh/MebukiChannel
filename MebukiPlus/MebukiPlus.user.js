@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-11-21_13:30
+// @version      2026-11-21_14:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -1113,14 +1113,16 @@
     elmJump.dataset.MebukiPlusAdded = 1;
     const options = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
       .map(n => { return { tag: 'option', textContent: n * 100, } });
-    options.unshift({ tag: 'option', textContent: 'Jump', value: 0, });
+    options.unshift({ tag: 'option', textContent: 'Jump', });
     elmJump.appendChild(prepareElement({
       tag: 'select',
       title: 'Jump to res',
       children: options,
       events: {
         change: (ev) => {
-          const id = messageIds[parseInt(ev.currentTarget.value)];
+          const resNum = ev.currentTarget.value;
+          if (!resNum.match(/^\d+$/)) { return; }
+          const id = messageIds[parseInt(resNum)];
           if (!id) { return; }
           d.getElementById(id).scrollIntoView({ behavior: 'smooth', });
         }
