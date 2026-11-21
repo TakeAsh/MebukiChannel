@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-11-21_14:00
+// @version      2026-11-21_18:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -1107,14 +1107,15 @@
     });
   }
   function addJumpToResNum(target) {
-    const elmJump = getNodesByXpath('.//button[@aria-label="スレ先頭へ"]', target)[0]?.parentNode
+    const elmContainer = getNodesByXpath('.//button[@aria-label="スレ先頭へ"]', target)[0]?.parentNode
       || getNodesByXpath('.//span[contains(text(),"スレ先頭へ")]', target)[0]?.parentNode?.parentNode;
-    if (!elmJump || elmJump.dataset.MebukiPlusAdded) { return; }
-    elmJump.dataset.MebukiPlusAdded = 1;
+    if (!elmContainer || elmContainer.dataset.MebukiPlusAdded) { return; }
+    elmContainer.dataset.MebukiPlusAdded = 1;
+    elmContainer.style.alignItems = 'flex-end';
     const options = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
       .map(n => { return { tag: 'option', textContent: n * 100, } });
     options.unshift({ tag: 'option', textContent: 'Jump', });
-    elmJump.appendChild(prepareElement({
+    elmContainer.appendChild(prepareElement({
       tag: 'select',
       title: 'Jump to res',
       children: options,
