@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2026-10-30_22:30
+// @version      2026-11-21_13:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -389,6 +389,7 @@
       // Thread
       showDropTime(header, footer, target);
       addFooterTags(footer);
+      addJumpToResNum();
       addCaptureEmoji(target);
       processAnchor(target);
       pickupZorome(target);
@@ -1104,6 +1105,27 @@
         textContent: a.textContent,
       }));
     });
+  }
+  function addJumpToResNum(target) {
+    const elmJump = getNodesByXpath('.//button[@aria-label="スレ先頭へ"]', target)[0]?.parentNode
+      || getNodesByXpath('.//span[contains(text(),"スレ先頭へ")]', target)[0]?.parentNode?.parentNode;
+    if (!elmJump || elmJump.dataset.MebukiPlusAdded) { return; }
+    elmJump.dataset.MebukiPlusAdded = 1;
+    const options = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      .map(n => { return { tag: 'option', textContent: n * 100, } });
+    options.unshift({ tag: 'option', textContent: 'Jump', value: 0, });
+    elmJump.appendChild(prepareElement({
+      tag: 'select',
+      title: 'Jump to res',
+      children: options,
+      events: {
+        change: (ev) => {
+          const id = messageIds[parseInt(ev.currentTarget.value)];
+          if (!id) { return; }
+          d.getElementById(id).scrollIntoView({ behavior: 'smooth', });
+        }
+      },
+    }));
   }
   function addCaptureEmoji(target) {
     if (!settings.CaptureEmoji) { return; }
